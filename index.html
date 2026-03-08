@@ -2,76 +2,91 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shortlog - 문장 블로그</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shortlog</title>
     <style>
-        body { font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; background-color: #f4f6f8; color: #333; }
-        .screen { display: none; min-height: 100vh; padding-bottom: 80px; }
+        /* [핵심] 모든 화면을 화면 크기에 딱 맞게 고정 */
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f4f6f8; }
+
+        /* 화면(Screen) 설정: 활성화된 화면만 보이고 나머지는 공간조차 차지하지 않음 */
+        .screen { 
+            display: none; 
+            height: 100%; 
+            width: 100%; 
+            overflow-y: auto; /* 내용이 많으면 내부에서만 스크롤 */
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            background: #f4f6f8;
+        }
         .active-screen { display: block; }
 
-        /* 헤더 */
-        header { background: white; padding: 15px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;}
-        h1 { margin: 0; font-size: 1.2rem; color: #00c73c; }
-
-        /* 로그인 화면 */
-        #login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: white; }
-        .btn-google { background: #4285F4; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px; }
-
-        /* 컨테이너 및 카드 */
-        .container { padding: 20px; }
-        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
-        .search-bar { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 20px; background: #fff; outline: none; }
-        .search-btn { background: #00c73c; color: white; border: none; padding: 0 15px; border-radius: 20px; cursor: pointer; }
-        
-        .post-card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-        .post-card h3 { margin: 0 0 10px 0; }
-
-        /* 하단 네비게이션 (3개 항목) */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); border-top: 1px solid #eee; z-index: 1000; }
-        .nav-btn { background: none; border: none; font-size: 0.85rem; color: #777; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; }
-        .nav-btn span { font-size: 1.4rem; }
+        /* 하단바 디자인 */
+        .bottom-nav { 
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            height: 65px;
+            background: white; 
+            display: none; /* 로그인 전에는 숨김 */
+            justify-content: space-around; 
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05); 
+            z-index: 1000;
+        }
+        .nav-btn { background: none; border: none; font-size: 0.8rem; color: #777; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
         .nav-btn.active { color: #00c73c; font-weight: bold; }
+        .nav-btn span { font-size: 1.5rem; }
 
-        /* 친구 목록 스타일 */
-        .friend-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: white; border-radius: 10px; margin-bottom: 10px; }
-        .friend-img { width: 45px; height: 45px; border-radius: 50%; background: #eee; }
+        /* 공통 헤더 & 컨텐츠 */
+        header { background: white; padding: 15px 20px; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        h1 { margin: 0; font-size: 1.1rem; color: #00c73c; }
+        .content { padding: 20px; padding-bottom: 80px; } /* 하단바 공간 */
 
-        .fab { position: fixed; bottom: 90px; right: 20px; background: #00c73c; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,199,60,0.3); border: none; cursor: pointer; }
+        /* 로그인 화면 특화 */
+        #login-screen { 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            background: white; 
+            z-index: 2000; 
+        }
+        .btn-google { background: #4285F4; color: white; border: none; padding: 15px 30px; border-radius: 30px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+
+        /* 검색창 & 카드 */
+        .search-box { display: flex; gap: 8px; margin-bottom: 20px; }
+        .search-input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 10px 15px; outline: none; }
+        .post-card { background: white; padding: 18px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
 
     <div id="login-screen" class="screen active-screen">
-        <h1 style="font-size: 2.5rem; margin-bottom: 10px;">Shortlog</h1>
-        <p style="color: #666; margin-bottom: 40px;">문장으로 이어지는 우리들의 기록</p>
-        <button id="login-btn" class="btn-google">구글 계정으로 시작하기</button>
+        <h1 style="font-size: 3rem; margin-bottom: 10px;">Shortlog</h1>
+        <p style="color: #666; margin-bottom: 50px;">문장으로 이어지는 우리들의 기록</p>
+        <button id="login-btn" class="btn-google">구글로 로그인하기</button>
     </div>
 
     <div id="main-screen" class="screen">
         <header><h1>홈 피드</h1></header>
-        <div class="container">
+        <div class="content">
             <div class="search-box">
-                <input type="text" id="search-input" class="search-bar" placeholder="글 제목이나 키워드 검색...">
-                <button id="search-submit" class="search-btn">🔍</button>
+                <input type="text" id="search-input" class="search-input" placeholder="제목 검색...">
+                <button id="search-submit" style="background:none; border:none; font-size:1.5rem;">🔍</button>
             </div>
             <div id="post-list">
-                <div class="post-card"><h3>환영합니다! 첫 글을 남겨보세요.</h3><p>관리자 · 문장 1개</p></div>
-                <div class="post-card"><h3>오늘의 날씨와 기분</h3><p>대현 · 문장 5개</p></div>
+                <div class="post-card"><h3>Shortlog 환영합니다!</h3><p>관리자 · 문장 1개</p></div>
+                <div class="post-card"><h3>오늘의 점심 메뉴</h3><p>대현 · 문장 3개</p></div>
             </div>
         </div>
     </div>
 
     <div id="friends-screen" class="screen">
-        <header><h1>친구 관리</h1></header>
-        <div class="container">
-            <div class="friend-item">
-                <div class="friend-img"></div>
-                <div><strong>독서왕</strong><p style="margin:0; font-size:0.8rem; color:#777;">최근 글: 어린왕자 리뷰</p></div>
-            </div>
-            <div class="friend-item">
-                <div class="friend-img"></div>
-                <div><strong>문장수집가</strong><p style="margin:0; font-size:0.8rem; color:#777;">최근 글: 인생 문장 10선</p></div>
-            </div>
+        <header><h1>친구</h1></header>
+        <div class="content">
+            <p style="color:#999; text-align:center;">등록된 친구가 없습니다.</p>
         </div>
     </div>
 
@@ -80,34 +95,26 @@
             <h1>내 블로그</h1>
             <button id="logout-btn" style="border:none; background:none; color:#999;">로그아웃</button>
         </header>
-        <div class="container">
+        <div class="content">
             <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px;">
-                <img id="user-photo" src="" style="width:60px; height:60px; border-radius:50%; display:none;">
-                <div><h2 id="user-name" style="margin:0;">사용자</h2><p id="user-email" style="color:#777;"></p></div>
+                <img id="user-photo" src="" style="width:50px; height:50px; border-radius:50%; display:none;">
+                <div><strong id="user-name">사용자</strong><div id="user-email" style="font-size:0.8rem; color:#888;"></div></div>
             </div>
-            <h3>내 포스트</h3>
-            <div id="my-posts" style="color:#999; text-align:center; padding:40px 0;">아직 작성한 글이 없습니다.</div>
+            <p style="color:#999; text-align:center;">작성한 글이 없습니다.</p>
         </div>
-        <button class="fab">✏️</button>
     </div>
 
-    <div id="bottom-nav" class="bottom-nav" style="display: none;">
-        <button class="nav-btn active" onclick="switchScreen('main-screen', this)">
-            <span>🏠</span>홈 피드
-        </button>
-        <button class="nav-btn" onclick="switchScreen('friends-screen', this)">
-            <span>👥</span>친구
-        </button>
-        <button class="nav-btn" onclick="switchScreen('profile-screen', this)">
-            <span>👤</span>내 블로그
-        </button>
-    </div>
+    <nav id="bottom-nav" class="bottom-nav">
+        <button class="nav-btn active" id="btn-home"><span>🏠</span>홈</button>
+        <button class="nav-btn" id="btn-friends"><span>👥</span>친구</button>
+        <button class="nav-btn" id="btn-profile"><span>👤</span>내 블로그</button>
+    </nav>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
-
+    
+    // 대현님의 설정값 그대로 유지
     const firebaseConfig = {
         apiKey: "AIzaSyCyCdlkXcLMvGO3NVg5QPQsPMPrd_JyaUY",
         authDomain: "shortlog-0.firebaseapp.com",
@@ -120,57 +127,53 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
 
-    // [수정사항 1] 화면 전환 함수
-    window.switchScreen = (screenId, btnElement) => {
-        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active-screen'));
-        document.getElementById(screenId).classList.add('active-screen');
-        
-        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-        if(btnElement) btnElement.classList.add('active');
-    };
+    // [핵심] 화면 전환 함수: 스크롤을 항상 맨 위로 리셋!
+    function switchScreen(targetId, btnId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+        const target = document.getElementById(targetId);
+        target.classList.add('active-screen');
+        target.scrollTop = 0; // 스크롤 위치 초기화
 
-    // [수정사항 2] 검색 기능 작동
-    document.getElementById('search-submit').onclick = () => {
-        const keyword = document.getElementById('search-input').value.toLowerCase();
-        const cards = document.querySelectorAll('#post-list .post-card');
-        
-        cards.forEach(card => {
-            const title = card.querySelector('h3').innerText.toLowerCase();
-            if (title.includes(keyword)) {
-                card.style.display = "block";
-            } else {
-                card.style.display = "none";
-            }
-        });
-    };
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        if(btnId) document.getElementById(btnId).classList.add('active');
+    }
 
-    // 로그인 로직
-    document.getElementById('login-btn').onclick = () => {
-        signInWithPopup(auth, provider).catch(err => alert("로그인 실패!"));
-    };
+    // 네비게이션 클릭 이벤트
+    document.getElementById('btn-home').onclick = () => switchScreen('main-screen', 'btn-home');
+    document.getElementById('btn-friends').onclick = () => switchScreen('friends-screen', 'btn-friends');
+    document.getElementById('btn-profile').onclick = () => switchScreen('profile-screen', 'btn-profile');
 
+    // 로그인/로그아웃 로직
+    document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
     document.getElementById('logout-btn').onclick = () => signOut(auth);
 
-    // 자동 전환 로직
+    // 로그인 상태 감지
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            // 로그인 성공 시 홈 피드로 자동 전환
-            switchScreen('main-screen', document.querySelectorAll('.nav-btn')[0]);
+            switchScreen('main-screen', 'btn-home');
             document.getElementById('bottom-nav').style.display = 'flex';
             document.getElementById('user-name').innerText = user.displayName;
             document.getElementById('user-email').innerText = user.email;
             if(user.photoURL) {
-                document.getElementById('user-photo').src = user.photoURL;
-                document.getElementById('user-photo').style.display = 'block';
+                const img = document.getElementById('user-photo');
+                img.src = user.photoURL;
+                img.style.display = 'block';
             }
         } else {
             switchScreen('login-screen');
             document.getElementById('bottom-nav').style.display = 'none';
         }
     });
+
+    // 검색 간단 로직
+    document.getElementById('search-submit').onclick = () => {
+        const val = document.getElementById('search-input').value.toLowerCase();
+        document.querySelectorAll('#post-list .post-card').forEach(card => {
+            card.style.display = card.innerText.toLowerCase().includes(val) ? 'block' : 'none';
+        });
+    };
 </script>
 </body>
 </html>
