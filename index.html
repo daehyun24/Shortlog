@@ -5,92 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Shortlog</title>
     <style>
-        /* 1. 기본 레이아웃: 스크롤 꼬임 방지 */
-        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Pretendard', -apple-system, sans-serif; background: #f8f9fa; }
+        /* 기본 설정: 화면 밖으로 내용이 새나가지 않게 함 */
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background: #f8f9fa; }
         
-        .page { display: none; height: 100%; width: 100%; position: absolute; top: 0; left: 0; overflow-y: auto; box-sizing: border-box; }
-        .active { display: block !important; }
+        /* [중요] 로그인 전/후 전용 컨테이너 */
+        #auth-container, #app-container { height: 100%; width: 100%; display: none; }
+        
+        /* 로그인 화면 스타일 */
+        #auth-container { 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            background: white; position: fixed; top: 0; left: 0; z-index: 9999;
+        }
+        .login-logo { font-size: 3.5rem; font-weight: bold; color: #00c73c; margin-bottom: 10px; }
+        .btn-google { background: #4285F4; color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
 
-        /* 2. 로그인 화면 디자인 */
-        #page-login { display: flex; flex-direction: column; justify-content: center; align-items: center; background: white; text-align: center; }
-        .login-logo { font-size: 3rem; font-weight: bold; color: #00c73c; margin-bottom: 10px; }
-        .btn-google { background: #4285F4; color: white; border: none; padding: 15px 30px; border-radius: 30px; font-size: 1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(66,133,244,0.3); }
-
-        /* 3. 상단 헤더 & 검색바 */
-        header { background: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        /* 앱 실행 화면 스타일 */
+        .page { display: none; height: 100%; width: 100%; overflow-y: auto; padding-bottom: 80px; box-sizing: border-box; }
+        .page.active { display: block; }
+        
+        header { background: white; padding: 15px 20px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 10; }
         header h1 { margin: 0; font-size: 1.2rem; color: #00c73c; }
         
-        .container { padding: 20px; padding-bottom: 100px; }
-        .search-box { display: flex; gap: 8px; margin-bottom: 20px; background: white; padding: 5px 15px; border-radius: 25px; border: 1px solid #ddd; }
-        .search-input { border: none; flex: 1; padding: 10px; outline: none; font-size: 0.95rem; }
+        .search-box { margin: 15px; background: white; border: 1px solid #ddd; border-radius: 25px; padding: 5px 15px; display: flex; align-items: center; }
+        .search-input { border: none; flex: 1; padding: 10px; outline: none; }
 
-        /* 4. 포스트 카드 디자인 (Firestore 데이터 맞춤) */
-        .post-card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .post-text { font-size: 1.1rem; line-height: 1.5; margin-bottom: 15px; color: #222; }
-        .post-info { font-size: 0.85rem; color: #888; display: flex; justify-content: space-between; align-items: center; }
-        .like-btn { color: #ff4d4d; border: 1px solid #ff4d4d; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; }
-
-        /* 5. 하단 네비게이션 (3개 탭) */
-        nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: white; border-top: 1px solid #eee; display: none; justify-content: space-around; align-items: center; z-index: 1000; }
+        /* 하단바 */
+        nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; }
         .nav-btn { background: none; border: none; font-size: 0.8rem; color: #aaa; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
         .nav-btn.active { color: #00c73c; font-weight: bold; }
-        .nav-btn span { font-size: 1.5rem; margin-bottom: 3px; }
-
-        /* 프로필 이미지 */
-        .profile-img { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #00c73c; }
     </style>
 </head>
 <body>
 
-    <div id="page-login" class="page active">
+    <div id="auth-container">
         <div class="login-logo">Shortlog</div>
         <p style="color: #666; margin-bottom: 40px;">한 문장으로 기록하는 나의 일상</p>
         <button id="btn-login" class="btn-google">구글로 시작하기</button>
     </div>
 
-    <div id="page-home" class="page">
-        <header><h1>홈 피드</h1></header>
-        <div class="container">
+    <div id="app-container">
+        <div id="page-home" class="page active">
+            <header><h1>홈 피드</h1></header>
             <div class="search-box">
-                <input type="text" id="search-input" class="search-input" placeholder="키워드로 문장 검색...">
-                <button id="btn-search" style="background:none; border:none; cursor:pointer;">🔍</button>
+                <input type="text" class="search-input" placeholder="키워드로 문장 검색...">
+                <span>🔍</span>
             </div>
-            <div id="post-list">
-                <div class="post-card"><p class="post-text">로딩 중입니다...</p></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="page-friends" class="page">
-        <header><h1>친구</h1></header>
-        <div class="container">
-            <p style="text-align: center; color: #999; margin-top: 50px;">아직 팔로우한 친구가 없습니다.</p>
-        </div>
-    </div>
-
-    <div id="page-profile" class="page">
-        <header>
-            <h1>내 블로그</h1>
-            <button id="btn-logout" style="background:none; border:none; color:#999; font-size:0.8rem;">로그아웃</button>
-        </header>
-        <div class="container">
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px; background: white; padding: 20px; border-radius: 15px;">
-                <img id="user-photo" class="profile-img" src="" style="display:none;">
-                <div>
-                    <h2 id="user-name" style="margin:0; font-size:1.2rem;">사용자</h2>
-                    <p id="user-email" style="margin:5px 0 0 0; color:#888; font-size:0.8rem;"></p>
+            <div id="post-list" style="padding: 0 15px;">
                 </div>
-            </div>
-            <h3>내가 남긴 문장</h3>
-            <div id="my-posts" style="text-align:center; color:#ccc; padding:50px 0;">작성된 글이 없습니다.</div>
         </div>
-    </div>
 
-    <nav id="bottom-nav">
-        <button class="nav-btn active" id="nav-home"><span>🏠</span>홈</button>
-        <button class="nav-btn" id="nav-friends"><span>👥</span>친구</button>
-        <button class="nav-btn" id="nav-profile"><span>👤</span>내 블로그</button>
-    </nav>
+        <div id="page-friends" class="page">
+            <header><h1>친구</h1></header>
+            <p style="text-align:center; color:#999; margin-top:50px;">팔로우한 친구가 없습니다.</p>
+        </div>
+
+        <div id="page-profile" class="page">
+            <header>
+                <h1>내 블로그</h1>
+                <button id="btn-logout" style="background:none; border:none; color:#999;">로그아웃</button>
+            </header>
+            <div style="padding: 20px;">
+                <h2 id="user-display-name">사용자</h2>
+                <p id="user-display-email" style="color:#888;"></p>
+            </div>
+        </div>
+
+        <nav>
+            <button class="nav-btn active" onclick="showPage('page-home', this)"><span>🏠</span>홈</button>
+            <button class="nav-btn" onclick="showPage('page-friends', this)"><span>👥</span>친구</button>
+            <button class="nav-btn" onclick="showPage('page-profile', this)"><span>👤</span>내 블로그</button>
+        </nav>
+    </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
@@ -111,86 +96,54 @@
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
 
-    // 1. 화면 전환 함수 (확실한 전환 + 스크롤 리셋)
-    function switchPage(pageId, btnId) {
+    // 탭 전환 함수
+    window.showPage = (pageId, btn) => {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        const target = document.getElementById(pageId);
-        target.classList.add('active');
-        target.scrollTop = 0;
-
+        document.getElementById(pageId).classList.add('active');
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        if(btnId) document.getElementById(btnId).classList.add('active');
-    }
+        btn.classList.add('active');
+    };
 
-    // 2. 하단바 클릭 이벤트
-    document.getElementById('nav-home').onclick = () => switchPage('page-home', 'nav-home');
-    document.getElementById('nav-friends').onclick = () => switchPage('page-friends', 'nav-friends');
-    document.getElementById('nav-profile').onclick = () => switchPage('page-profile', 'nav-profile');
-
-    // 3. 로그인/로그아웃 로직
+    // 로그인/로그아웃 버튼
     document.getElementById('btn-login').onclick = () => signInWithPopup(auth, provider);
     document.getElementById('btn-logout').onclick = () => signOut(auth);
 
-    // 4. Firestore에서 실제 데이터 가져오기 (이미지에 있던 필드명 기준)
-    async function loadPosts() {
-        const postList = document.getElementById('post-list');
-        postList.innerHTML = ""; // 기존 내용 비우기
-        
-        try {
-            const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
-            const querySnapshot = await getDocs(q);
-            
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                const card = document.createElement('div');
-                card.className = 'post-card';
-                card.innerHTML = `
-                    <p class="post-text">${data.text}</p>
-                    <div class="post-info">
-                        <span>BY <strong>${data.nickname || '익명'}</strong> · ${data.time || ''}</span>
-                        <span class="like-btn">❤️ ${data.likes || 0}</span>
-                    </div>
-                `;
-                postList.appendChild(card);
-            });
-        } catch (e) {
-            postList.innerHTML = "<p style='text-align:center; color:red;'>데이터를 불러오지 못했습니다.</p>";
-        }
-    }
-
-    // 5. 로그인 상태 감지 (모든 전환의 시작점)
+    // [핵심] 로그인 상태에 따른 '컨테이너' 제어
     onAuthStateChanged(auth, (user) => {
+        const authCont = document.getElementById('auth-container');
+        const appCont = document.getElementById('app-container');
+
         if (user) {
-            // 로그인 성공 -> 홈으로 이동
-            switchPage('page-home', 'nav-home');
-            document.getElementById('bottom-nav').style.display = 'flex';
+            // 로그인 됨: 로그인 화면 완전히 제거, 앱 화면 표시
+            authCont.style.setProperty('display', 'none', 'important');
+            appCont.style.display = 'block';
             
-            // 유저 정보 업데이트
-            document.getElementById('user-name').innerText = user.displayName;
-            document.getElementById('user-email').innerText = user.email;
-            if(user.photoURL) {
-                const img = document.getElementById('user-photo');
-                img.src = user.photoURL;
-                img.style.display = 'block';
-            }
-            
-            // 데이터 로드
+            document.getElementById('user-display-name').innerText = user.displayName;
+            document.getElementById('user-display-email').innerText = user.email;
             loadPosts();
         } else {
-            // 로그아웃 -> 로그인 화면으로
-            switchPage('page-login');
-            document.getElementById('bottom-nav').style.display = 'none';
+            // 로그아웃 됨: 앱 화면 제거, 로그인 화면 표시
+            authCont.style.setProperty('display', 'flex', 'important');
+            appCont.style.display = 'none';
         }
     });
 
-    // 6. 검색 기능 (현재 로드된 카드 기준)
-    document.getElementById('btn-search').onclick = () => {
-        const keyword = document.getElementById('search-input').value.toLowerCase();
-        document.querySelectorAll('.post-card').forEach(card => {
-            const text = card.querySelector('.post-text').innerText.toLowerCase();
-            card.style.display = text.includes(keyword) ? 'block' : 'none';
-        });
-    };
+    async function loadPosts() {
+        const list = document.getElementById('post-list');
+        list.innerHTML = "<p style='text-align:center;'>데이터 로딩 중...</p>";
+        try {
+            const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+            const snap = await getDocs(q);
+            list.innerHTML = "";
+            snap.forEach(doc => {
+                const d = doc.data();
+                list.innerHTML += `<div style="background:white; padding:15px; border-radius:10px; margin-bottom:10px; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+                    <p style="margin:0 0 10px 0; font-size:1rem;">${d.text}</p>
+                    <small style="color:#888;">BY ${d.nickname} · ${d.time}</small>
+                </div>`;
+            });
+        } catch(e) { list.innerHTML = "데이터를 가져오지 못했습니다."; }
+    }
 </script>
 </body>
 </html>
