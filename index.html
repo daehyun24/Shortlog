@@ -5,58 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Shortlog</title>
     <style>
-        /* 기본 레이아웃 */
-        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Pretendard', sans-serif; background: #f8f9fa; color: #333; }
-        .screen { display: none; height: 100%; width: 100%; overflow-y: auto; padding-bottom: 90px; box-sizing: border-box; position: absolute; top:0; left:0; background: #f8f9fa; }
-        .active-screen { display: block !important; z-index: 10; }
+        /* 1. 기본 레이아웃 & 스크린 제어 (핵심 수정) */
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Pretendard', -apple-system, sans-serif; background: #f8f9fa; }
         
-        header { background: white; padding: 15px 20px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
-        header h1 { margin: 0; font-size: 1.2rem; color: #00c73c; }
+        /* 모든 스크린은 기본적으로 숨김 */
+        .screen { 
+            display: none !important; 
+            height: 100%; width: 100%; 
+            position: absolute; top: 0; left: 0; 
+            overflow-y: auto; box-sizing: border-box; 
+            background: #f8f9fa; 
+        }
+        /* active-screen 클래스가 붙은 스크린만 보임 */
+        .active-screen { display: flex !important; flex-direction: column; z-index: 10; }
+        /* 메인 콘텐츠용 화면은 flex가 아닌 block으로 (스크롤 원활) */
+        #screen-main.active-screen, #screen-detail.active-screen { display: block !important; }
 
-        /* 로그인 & 온보딩 화면 */
-        #screen-login { display: flex; flex-direction: column; justify-content: center; align-items: center; background: white; z-index: 9999; }
+        /* 2. 로그인 & 온보딩 디자인 */
+        #screen-login { justify-content: center; align-items: center; background: white; z-index: 1000; }
         .login-logo { font-size: 3.5rem; font-weight: bold; color: #00c73c; margin-bottom: 10px; }
         .btn-main { background: #00c73c; color: white; border: none; padding: 15px 30px; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
-        
-        #screen-onboarding { display: flex; flex-direction: column; justify-content: center; align-items: center; background: white; z-index: 9998; padding: 20px; }
+
+        #screen-onboarding { justify-content: center; align-items: center; background: white; z-index: 900; padding: 20px; }
         .input-box { width: 100%; max-width: 300px; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; }
 
-        /* 포스트 카드 (홈) */
-        .post-card { background: white; padding: 20px; border-radius: 15px; margin: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; }
-        .post-card:hover { background: #fafafa; }
-        .post-title { font-size: 1.1rem; font-weight: bold; margin: 0 0 8px 0; color: #111; }
-        .post-preview { font-size: 0.95rem; color: #666; margin: 0 0 12px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        /* 3. 홈 피드 카드 */
+        header { background: white; padding: 15px 20px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { margin: 0; font-size: 1.2rem; color: #00c73c; }
+        
+        .post-card { background: white; padding: 20px; border-radius: 15px; margin: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; }
+        .post-title { font-size: 1.1rem; font-weight: bold; margin: 0 0 8px 0; }
+        .post-preview { font-size: 0.95rem; color: #666; margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .post-info { font-size: 0.8rem; color: #999; display: flex; justify-content: space-between; }
 
-        /* 상세 화면 & 문장별 분리 */
-        #screen-detail { background: white; z-index: 50; }
-        .detail-header { padding: 20px; border-bottom: 1px solid #eee; }
-        .detail-title { font-size: 1.5rem; font-weight: bold; margin: 0 0 10px 0; }
-        .detail-author { font-size: 0.9rem; color: #888; }
-        
-        .sentence-block { padding: 15px 20px; border-bottom: 1px dashed #eee; font-size: 1.1rem; line-height: 1.6; cursor: pointer; transition: 0.2s; }
-        .sentence-block:hover { background: #f0fdf4; }
+        /* 4. 상세 화면 & 문장별 시스템 */
+        .sentence-block { padding: 15px 20px; border-bottom: 1px dashed #eee; font-size: 1.1rem; line-height: 1.6; cursor: pointer; }
         .sentence-block.selected { background: #dcfce7; border-left: 4px solid #00c73c; }
-        
-        /* 댓글 영역 */
-        .comment-section { padding: 20px; background: #f8f9fa; min-height: 300px; }
-        .comment-box { display: flex; gap: 10px; margin-bottom: 20px; }
-        .comment-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
-        .comment-item { background: white; padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 0.9rem; }
+        .comment-section { padding: 20px; background: #f8f9fa; }
+        .comment-input { width: 70%; padding: 10px; border: 1px solid #ddd; border-radius: 20px; }
 
-        /* 네비게이션 & 플로팅 버튼 */
-        nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
-        .nav-btn { background: none; border: none; font-size: 0.75rem; color: #bbb; display: flex; flex-direction: column; align-items: center; cursor: pointer; gap: 5px; }
+        /* 5. 공통 UI */
+        nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: white; border-top: 1px solid #eee; display: none; justify-content: space-around; align-items: center; z-index: 100; }
+        .nav-btn { background: none; border: none; font-size: 0.75rem; color: #bbb; display: flex; flex-direction: column; align-items: center; }
         .nav-btn.active { color: #00c73c; font-weight: bold; }
-        .nav-btn span { font-size: 1.5rem; }
         
-        .fab { position: fixed; bottom: 90px; right: 20px; background: #00c73c; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2rem; border: none; cursor: pointer; z-index: 90; box-shadow: 0 4px 10px rgba(0,199,60,0.3); }
+        .fab { position: fixed; bottom: 90px; right: 20px; background: #00c73c; color: white; width: 56px; height: 56px; border-radius: 50%; display: none; justify-content: center; align-items: center; font-size: 2rem; border: none; box-shadow: 0 4px 10px rgba(0,199,60,0.3); z-index: 99; }
 
-        /* 글쓰기 팝업 */
+        /* 글쓰기 모달 */
         #write-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; justify-content: center; align-items: center; }
         .modal-content { background: white; width: 90%; max-width: 400px; padding: 20px; border-radius: 15px; }
-        .write-title-input { width: 100%; padding: 10px; font-size: 1.1rem; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; outline: none; font-weight: bold; }
-        .write-body-input { width: 100%; height: 120px; padding: 10px; font-size: 1rem; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; outline: none; resize: none; }
     </style>
 </head>
 <body>
@@ -69,57 +66,53 @@
 
     <div id="screen-onboarding" class="screen">
         <h2 style="color:#00c73c;">환영합니다!</h2>
-        <p style="color:#666; text-align:center; margin-bottom:30px;">Shortlog에서 사용할<br>아이디와 닉네임을 설정해주세요.</p>
-        <input type="text" id="join-id" class="input-box" placeholder="고유 아이디 (영문/숫자, 중복불가)">
-        <input type="text" id="join-nick" class="input-box" placeholder="사용할 닉네임 (자유롭게)">
-        <button id="btn-join" class="btn-main" style="width:100%; max-width:300px; margin-top:10px;">시작하기</button>
+        <p style="color:#666;">아이디와 닉네임을 설정해주세요.</p>
+        <input type="text" id="join-id" class="input-box" placeholder="고유 아이디 (영문/숫자)">
+        <input type="text" id="join-nick" class="input-box" placeholder="닉네임">
+        <button id="btn-join" class="btn-main" style="width:100%; max-width:300px;">시작하기</button>
     </div>
 
     <div id="screen-main" class="screen">
         <header><h1>Shortlog</h1></header>
-        <div id="post-list" style="padding-bottom:20px;">
-            </div>
+        <div id="post-list" style="padding-bottom:100px;"></div>
     </div>
 
     <div id="screen-detail" class="screen">
         <header>
-            <button onclick="closeDetail()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">←</button>
+            <button onclick="closeDetail()" style="background:none; border:none; font-size:1.5rem;">←</button>
             <h1>글 읽기</h1>
             <div style="width:24px;"></div>
         </header>
-        <div class="detail-header">
-            <h2 id="detail-title" class="detail-title">제목</h2>
-            <div id="detail-author" class="detail-author">작성자 · 시간</div>
+        <div style="padding:20px; border-bottom:1px solid #eee;">
+            <h2 id="detail-title" style="margin:0;"></h2>
+            <p id="detail-author" style="color:#888; font-size:0.9rem;"></p>
         </div>
-        <div id="detail-body">
-            </div>
-        
+        <div id="detail-body"></div>
         <div class="comment-section">
-            <h4 style="margin-top:0; color:#00c73c;" id="comment-target-text">전체 글에 댓글 달기 (문장을 클릭해 선택)</h4>
-            <div class="comment-box">
-                <input type="text" id="comment-input" class="comment-input" placeholder="댓글을 입력하세요...">
-                <button id="btn-submit-comment" class="btn-main" style="padding:10px 20px; font-size:0.9rem;">등록</button>
+            <h4 id="comment-target-text">전체 글에 댓글 달기</h4>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="comment-input" class="comment-input" placeholder="댓글 입력...">
+                <button id="btn-submit-comment" class="btn-main" style="padding:10px 15px; font-size:0.8rem;">등록</button>
             </div>
-            <div id="comment-list">
-                </div>
+            <div id="comment-list" style="margin-top:20px;"></div>
         </div>
     </div>
 
-    <button class="fab" id="btn-open-write" style="display:none;">＋</button>
-    <nav id="bottom-nav" style="display:none;">
+    <button class="fab" id="btn-open-write">＋</button>
+    <nav id="bottom-nav">
         <button class="nav-btn active"><span>🏠</span>홈</button>
         <button class="nav-btn"><span>👥</span>친구</button>
-        <button class="nav-btn"><span>👤</span>내 블로그</button>
+        <button class="nav-btn"><span>👤</span>프로필</button>
     </nav>
 
     <div id="write-modal">
         <div class="modal-content">
-            <h3 style="margin-top:0;">새 글 쓰기</h3>
-            <input type="text" id="write-title" class="write-title-input" placeholder="글 제목">
-            <textarea id="write-body" class="write-body-input" placeholder="본문을 작성하세요. (엔터나 마침표로 문장이 구분됩니다)"></textarea>
+            <h3>새 글 쓰기</h3>
+            <input type="text" id="write-title" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;" placeholder="제목">
+            <textarea id="write-body" style="width:100%; height:120px; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;" placeholder="본문 (엔터로 문장을 구분하세요)"></textarea>
             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
                 <button id="btn-close-write" style="background:#eee; border:none; padding:10px 20px; border-radius:8px;">취소</button>
-                <button id="btn-submit-write" class="btn-main" style="padding:10px 20px; font-size:1rem; border-radius:8px;">등록</button>
+                <button id="btn-submit-write" class="btn-main" style="padding:10px 20px;">등록</button>
             </div>
         </div>
     </div>
@@ -143,36 +136,34 @@
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
 
-    let currentUserData = null; // 로그인한 유저의 DB 정보 (닉네임, 아이디)
-    let currentPostId = null;   // 현재 보고 있는 글 ID
-    let selectedSentenceIndex = -1; // -1이면 전체 글, 그 외는 문장 인덱스
+    let currentUserData = null;
+    let currentPostId = null;
+    let selectedSentenceIndex = -1;
 
-    // [유틸] 화면 전환 함수
     function showScreen(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-        document.getElementById(screenId).classList.add('active-screen');
+        const target = document.getElementById(screenId);
+        if(target) target.classList.add('active-screen');
     }
 
-    // ==========================================
-    // 1. 로그인 & 온보딩 (고유 아이디/닉네임) 로직
-    // ==========================================
-    document.getElementById('btn-login').onclick = () => signInWithPopup(auth, provider);
-
+    // [중요] 인증 상태 감지 로직 보강
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            // DB에서 유저 정보 확인
-            const userDocRef = doc(db, "users", user.uid);
-            const userSnap = await getDoc(userDocRef);
-
-            if (userSnap.exists()) {
-                // 이미 가입된 유저 -> 홈으로 이동
-                currentUserData = userSnap.data();
-                showScreen('screen-main');
-                document.getElementById('bottom-nav').style.display = 'flex';
-                document.getElementById('btn-open-write').style.display = 'flex';
-                loadPosts();
-            } else {
-                // 신규 유저 -> 온보딩 화면으로 이동
+            console.log("로그인 감지됨:", user.email);
+            try {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    currentUserData = userDoc.data();
+                    showScreen('screen-main');
+                    document.getElementById('bottom-nav').style.display = 'flex';
+                    document.getElementById('btn-open-write').style.display = 'flex';
+                    loadPosts();
+                } else {
+                    showScreen('screen-onboarding');
+                }
+            } catch (e) {
+                console.error("데이터 로드 실패:", e);
+                // 에러 발생 시 온보딩이라도 띄움
                 showScreen('screen-onboarding');
             }
         } else {
@@ -182,51 +173,27 @@
         }
     });
 
-    // 신규 가입 폼 제출
+    document.getElementById('btn-login').onclick = () => signInWithPopup(auth, provider);
+
     document.getElementById('btn-join').onclick = async () => {
-        const idInput = document.getElementById('join-id').value.trim();
-        const nickInput = document.getElementById('join-nick').value.trim();
-        const btn = document.getElementById('btn-join');
-
-        if (!idInput || !nickInput) return alert("아이디와 닉네임을 모두 입력해주세요.");
+        const id = document.getElementById('join-id').value.trim();
+        const nick = document.getElementById('join-nick').value.trim();
+        if(!id || !nick) return alert("입력해주세요.");
         
-        btn.disabled = true;
-        btn.innerText = "확인 중...";
+        // 아이디 중복 체크
+        const q = query(collection(db, "users"), where("customId", "==", id));
+        const snap = await getDocs(q);
+        if(!snap.empty) return alert("이미 존재하는 아이디입니다.");
 
-        try {
-            // 고유 아이디 중복 검사
-            const q = query(collection(db, "users"), where("customId", "==", idInput));
-            const querySnapshot = await getDocs(q);
-            
-            if (!querySnapshot.empty) {
-                alert("이미 사용 중인 아이디입니다. 다른 아이디를 입력해주세요.");
-                btn.disabled = false;
-                btn.innerText = "시작하기";
-                return;
-            }
-
-            // DB에 유저 정보 저장
-            const user = auth.currentUser;
-            const userData = { customId: idInput, nickname: nickInput, uid: user.uid };
-            await setDoc(doc(db, "users", user.uid), userData);
-            
-            currentUserData = userData;
-            alert("가입 완료! 환영합니다.");
-            showScreen('screen-main');
-            document.getElementById('bottom-nav').style.display = 'flex';
-            document.getElementById('btn-open-write').style.display = 'flex';
-            loadPosts();
-
-        } catch (e) {
-            alert("오류 발생: " + e.message);
-            btn.disabled = false;
-        }
+        const userData = { customId: id, nickname: nick, uid: auth.currentUser.uid };
+        await setDoc(doc(db, "users", auth.currentUser.uid), userData);
+        currentUserData = userData;
+        showScreen('screen-main');
+        document.getElementById('bottom-nav').style.display = 'flex';
+        document.getElementById('btn-open-write').style.display = 'flex';
+        loadPosts();
     };
 
-
-    // ==========================================
-    // 2. 글쓰기 (중복 방지 & 제목/본문 분리)
-    // ==========================================
     const modal = document.getElementById('write-modal');
     document.getElementById('btn-open-write').onclick = () => modal.style.display = 'flex';
     document.getElementById('btn-close-write').onclick = () => modal.style.display = 'none';
@@ -234,113 +201,66 @@
     document.getElementById('btn-submit-write').onclick = async () => {
         const title = document.getElementById('write-title').value.trim();
         const body = document.getElementById('write-body').value.trim();
-        const btn = document.getElementById('btn-submit-write');
+        if(!title || !body) return;
 
-        if(!title || !body) return alert("제목과 본문을 모두 입력해주세요!");
+        document.getElementById('btn-submit-write').disabled = true;
+        await addDoc(collection(db, "posts"), {
+            title, content: body, authorNick: currentUserData.nickname, authorId: currentUserData.customId,
+            timestamp: serverTimestamp(), time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+        });
         
-        btn.disabled = true; // [중복 방지 1] 버튼 즉시 비활성화 (연타 방지)
-        btn.innerText = "등록 중...";
-
-        try {
-            await addDoc(collection(db, "posts"), {
-                title: title,
-                content: body,
-                authorId: currentUserData.customId,
-                authorNick: currentUserData.nickname,
-                uid: auth.currentUser.uid,
-                time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
-                timestamp: serverTimestamp()
-            });
-            
-            // 폼 초기화
-            document.getElementById('write-title').value = "";
-            document.getElementById('write-body').value = "";
-            modal.style.display = 'none';
-            
-            await loadPosts(); // [중복 방지 2] 목록 새로고침 시 기존 리스트 확실히 날림
-        } catch (e) { 
-            alert("오류 발생: " + e.message); 
-        } finally {
-            btn.disabled = false; // 완료 후 버튼 활성화 복구
-            btn.innerText = "등록";
-        }
+        modal.style.display = 'none';
+        document.getElementById('write-title').value = "";
+        document.getElementById('write-body').value = "";
+        document.getElementById('btn-submit-write').disabled = false;
+        loadPosts();
     };
 
-
-    // ==========================================
-    // 3. 홈 피드 불러오기 (제목 + 짧은 본문)
-    // ==========================================
     async function loadPosts() {
         const list = document.getElementById('post-list');
-        list.innerHTML = "<p style='text-align:center; padding:20px; color:#999;'>글을 불러오는 중...</p>";
-        
-        try {
-            const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
-            const snap = await getDocs(q);
-            
-            list.innerHTML = ""; // 기존 목록 완벽히 삭제 (중복 출력 방지)
-            
-            snap.forEach(doc => {
-                const d = doc.data();
-                // 첫 문장만 자르기 (50글자 제한)
-                const previewText = d.content.length > 50 ? d.content.substring(0, 50) + "..." : d.content;
-                
-                // 카드 요소 생성 및 클릭 이벤트 연결 (상세보기)
-                const card = document.createElement('div');
-                card.className = "post-card";
-                card.onclick = () => openDetail(doc.id, d);
-                card.innerHTML = `
-                    <h3 class="post-title">${d.title}</h3>
-                    <p class="post-preview">${previewText}</p>
-                    <div class="post-info">
-                        <span><strong>${d.authorNick}</strong> (@${d.authorId})</span>
-                        <span>${d.time}</span>
-                    </div>
-                `;
-                list.appendChild(card);
-            });
-        } catch(e) { list.innerHTML = "<p style='text-align:center;'>오류가 발생했습니다.</p>"; }
+        list.innerHTML = "";
+        const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+        const snap = await getDocs(q);
+        snap.forEach(docSnap => {
+            const d = docSnap.data();
+            const div = document.createElement('div');
+            div.className = 'post-card';
+            div.onclick = () => openDetail(docSnap.id, d);
+            div.innerHTML = `
+                <div class="post-title">${d.title}</div>
+                <div class="post-preview">${d.content}</div>
+                <div class="post-info"><span>${d.authorNick}</span><span>${d.time}</span></div>
+            `;
+            list.appendChild(div);
+        });
     }
 
-
-    // ==========================================
-    // 4. 상세 화면 & 문장별 댓글 기능
-    // ==========================================
-    window.openDetail = (postId, data) => {
-        currentPostId = postId;
-        selectedSentenceIndex = -1; // 초기화 (전체 선택)
-        
+    window.openDetail = (id, data) => {
+        currentPostId = id;
+        selectedSentenceIndex = -1;
         document.getElementById('detail-title').innerText = data.title;
-        document.getElementById('detail-author').innerText = `${data.authorNick} (@${data.authorId}) · ${data.time}`;
+        document.getElementById('detail-author').innerText = data.authorNick;
         
-        // 본문을 엔터(\n) 기준으로 문장 분리
-        const sentences = data.content.split('\n').filter(s => s.trim() !== '');
-        const bodyContainer = document.getElementById('detail-body');
-        bodyContainer.innerHTML = "";
-        
-        sentences.forEach((sentence, index) => {
-            const div = document.createElement('div');
-            div.className = "sentence-block";
-            div.innerText = sentence;
-            
-            // 문장 클릭 시 선택 효과
-            div.onclick = () => {
+        const body = document.getElementById('detail-body');
+        body.innerHTML = "";
+        const lines = data.content.split('\n').filter(l => l.trim() !== "");
+        lines.forEach((line, i) => {
+            const lDiv = document.createElement('div');
+            lDiv.className = 'sentence-block';
+            lDiv.innerText = line;
+            lDiv.onclick = () => {
                 document.querySelectorAll('.sentence-block').forEach(el => el.classList.remove('selected'));
-                div.classList.add('selected');
-                selectedSentenceIndex = index;
-                document.getElementById('comment-target-text').innerText = `[${index+1}번째 문장] 에 댓글 달기`;
-                loadComments(); // 선택한 문장의 댓글만 다시 불러오기
+                lDiv.classList.add('selected');
+                selectedSentenceIndex = i;
+                document.getElementById('comment-target-text').innerText = `${i+1}번째 문장에 댓글 달기`;
+                loadComments();
             };
-            bodyContainer.appendChild(div);
+            body.appendChild(lDiv);
         });
-
-        document.getElementById('comment-target-text').innerText = "전체 글에 댓글 달기 (문장을 클릭해 선택)";
         loadComments();
-        
-        // UI 변경 (하단바, 플로팅버튼 숨김)
+        showScreen('screen-detail');
         document.getElementById('bottom-nav').style.display = 'none';
         document.getElementById('btn-open-write').style.display = 'none';
-        showScreen('screen-detail');
     };
 
     window.closeDetail = () => {
@@ -349,52 +269,31 @@
         document.getElementById('btn-open-write').style.display = 'flex';
     };
 
-    // 댓글 등록
     document.getElementById('btn-submit-comment').onclick = async () => {
-        const text = document.getElementById('comment-input').value.trim();
-        if(!text) return;
-
-        try {
-            await addDoc(collection(db, "comments"), {
-                postId: currentPostId,
-                sentenceIndex: selectedSentenceIndex, // -1: 전체, 0~: 특정 문장
-                text: text,
-                authorNick: currentUserData.nickname,
-                timestamp: serverTimestamp()
-            });
-            document.getElementById('comment-input').value = "";
-            loadComments();
-        } catch (e) { alert("댓글 작성 실패"); }
+        const input = document.getElementById('comment-input');
+        if(!input.value.trim()) return;
+        await addDoc(collection(db, "comments"), {
+            postId: currentPostId, sentenceIndex: selectedSentenceIndex,
+            text: input.value, authorNick: currentUserData.nickname, timestamp: serverTimestamp()
+        });
+        input.value = "";
+        loadComments();
     };
 
-    // 댓글 불러오기
     async function loadComments() {
         const list = document.getElementById('comment-list');
-        list.innerHTML = "<p style='color:#999;font-size:0.9rem;'>댓글 불러오는 중...</p>";
-        
-        try {
-            // 현재 글(postId)과 현재 선택된 문장(sentenceIndex)에 맞는 댓글만 쿼리
-            const q = query(collection(db, "comments"), 
-                            where("postId", "==", currentPostId), 
-                            where("sentenceIndex", "==", selectedSentenceIndex),
-                            orderBy("timestamp", "asc"));
-            const snap = await getDocs(q);
-            
-            list.innerHTML = "";
-            if(snap.empty) {
-                list.innerHTML = "<p style='color:#999;font-size:0.9rem;'>가장 먼저 댓글을 남겨보세요!</p>";
-                return;
-            }
-
-            snap.forEach(doc => {
-                const d = doc.data();
-                list.innerHTML += `
-                    <div class="comment-item">
-                        <strong>${d.authorNick}</strong> <span style="color:#555; margin-left:5px;">${d.text}</span>
-                    </div>
-                `;
-            });
-        } catch (e) { list.innerHTML = "<p style='color:red;'>오류</p>"; console.error(e); }
+        list.innerHTML = "";
+        const q = query(collection(db, "comments"), 
+                        where("postId", "==", currentPostId), 
+                        where("sentenceIndex", "==", selectedSentenceIndex),
+                        orderBy("timestamp", "asc"));
+        const snap = await getDocs(q);
+        snap.forEach(d => {
+            const data = d.data();
+            list.innerHTML += `<div style="padding:10px; background:white; border-radius:10px; margin-bottom:5px; font-size:0.9rem;">
+                <strong>${data.authorNick}</strong> ${data.text}
+            </div>`;
+        });
     }
 </script>
 </body>
