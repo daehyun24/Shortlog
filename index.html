@@ -5,45 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Shortlog</title>
     <style>
-        /* 1. 기본 레이아웃 & 초기화 */
+        /* 기본 레이아웃 & 초기화 */
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Pretendard', sans-serif; background: #f8f9fa; }
         #auth-container, #app-container { height: 100%; width: 100%; display: none; }
         
-        /* 2. 로그인 화면 (전면 고정) */
-        #auth-container { 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            background: white; position: fixed; top: 0; left: 0; z-index: 9999; 
-        }
+        /* 로그인 화면 */
+        #auth-container { display: flex; flex-direction: column; justify-content: center; align-items: center; background: white; position: fixed; top: 0; left: 0; z-index: 9999; }
         .login-logo { font-size: 3.5rem; font-weight: bold; color: #00c73c; margin-bottom: 10px; }
         .btn-google { background: #4285F4; color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(66,133,244,0.3); }
 
-        /* 3. 앱 내부 화면 구성 */
-        .page { display: none; height: 100%; width: 100%; overflow-y: auto; padding-bottom: 90px; box-sizing: border-box; background: #f8f9fa; }
+        /* 앱 내부 화면 공통 */
+        .page { display: none; height: 100%; width: 100%; overflow-y: auto; padding-bottom: 100px; box-sizing: border-box; background: #f8f9fa; }
         .page.active { display: block; }
         
         header { background: white; padding: 15px 20px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
         header h1 { margin: 0; font-size: 1.2rem; color: #00c73c; }
 
-        /* 검색창 */
+        /* 검색창 & 포스트 카드 */
         .search-box { margin: 15px; background: white; border: 1px solid #ddd; border-radius: 25px; padding: 5px 15px; display: flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .search-input { border: none; flex: 1; padding: 10px; outline: none; font-size: 0.95rem; }
-
-        /* 포스트 카드 */
+        
         .post-card { background: white; padding: 20px; border-radius: 15px; margin: 0 15px 15px 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .post-text { font-size: 1.05rem; line-height: 1.6; margin: 0 0 12px 0; color: #222; }
         .post-info { font-size: 0.8rem; color: #999; display: flex; justify-content: space-between; }
 
-        /* 4. 글쓰기 버튼 & 모달 */
+        /* 글쓰기 버튼 (플로팅) */
         .fab { position: fixed; bottom: 90px; right: 20px; background: #00c73c; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2rem; box-shadow: 0 4px 12px rgba(0,199,60,0.4); border: none; cursor: pointer; z-index: 900; }
         
+        /* 글쓰기 모달 */
         #write-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; justify-content: center; align-items: center; }
-        .modal-content { background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .modal-content { background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 20px; }
         .modal-content textarea { width: 100%; height: 150px; border: 1px solid #eee; border-radius: 12px; padding: 15px; font-size: 1rem; box-sizing: border-box; margin-top: 15px; outline: none; }
         .modal-btns { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
         .btn-send { background: #00c73c; color: white; border: none; padding: 10px 25px; border-radius: 10px; font-weight: bold; cursor: pointer; }
         .btn-close { background: #f1f1f1; color: #666; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; }
 
-        /* 5. 하단 네비게이션 */
+        /* 하단 네비게이션 */
         nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
         .nav-btn { background: none; border: none; font-size: 0.75rem; color: #bbb; display: flex; flex-direction: column; align-items: center; cursor: pointer; gap: 5px; }
         .nav-btn span { font-size: 1.6rem; }
@@ -59,6 +56,7 @@
     </div>
 
     <div id="app-container">
+        
         <div id="page-home" class="page active">
             <header><h1>Shortlog</h1></header>
             <div class="search-box">
@@ -67,7 +65,6 @@
             </div>
             <div id="post-list">
                 </div>
-            <button class="fab" id="btn-open-write">＋</button>
         </div>
 
         <div id="page-friends" class="page">
@@ -80,12 +77,18 @@
                 <h1>내 블로그</h1>
                 <button id="btn-logout" style="background:none; border:none; color:#999; font-size:0.8rem;">로그아웃</button>
             </header>
-            <div style="padding: 25px; background: white; margin: 15px; border-radius: 15px; text-align: center;">
+            <div style="padding: 25px; background: white; margin: 15px; border-radius: 15px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
                 <h2 id="display-name" style="margin-bottom:5px;">사용자</h2>
                 <p id="display-email" style="color:#888; margin-top:0; font-size:0.9rem;"></p>
             </div>
+            
+            <h3 style="margin: 25px 15px 10px 15px; color:#333; font-size:1.1rem;">내가 남긴 문장</h3>
+            <div id="my-post-list">
+                </div>
         </div>
 
+        <button class="fab" id="btn-open-write">＋</button>
+        
         <nav>
             <button class="nav-btn active" onclick="changeTab('page-home', this)"><span>🏠</span>홈</button>
             <button class="nav-btn" onclick="changeTab('page-friends', this)"><span>👥</span>친구</button>
@@ -109,7 +112,6 @@
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
     import { getFirestore, collection, getDocs, query, orderBy, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
-    // 대현님의 Firebase 설정
     const firebaseConfig = {
         apiKey: "AIzaSyCyCdlkXcLMvGO3NVg5QPQsPMPrd_JyaUY",
         authDomain: "shortlog-0.firebaseapp.com",
@@ -124,7 +126,6 @@
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
 
-    // 탭 전환 시스템
     window.changeTab = (pageId, btn) => {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
@@ -132,11 +133,12 @@
         btn.classList.add('active');
     };
 
-    // [글쓰기 로직]
+    // 모달 제어
     const modal = document.getElementById('write-modal');
     document.getElementById('btn-open-write').onclick = () => modal.style.display = 'flex';
     document.getElementById('btn-close-write').onclick = () => modal.style.display = 'none';
 
+    // 글쓰기 전송
     document.getElementById('btn-submit-write').onclick = async () => {
         const text = document.getElementById('write-input').value;
         const user = auth.currentUser;
@@ -153,21 +155,30 @@
             });
             document.getElementById('write-input').value = "";
             modal.style.display = 'none';
-            loadPosts(); 
+            loadPosts(); // 저장 후 리스트 새로고침
         } catch (e) { alert("오류 발생: " + e.message); }
     };
 
-    // [데이터 불러오기]
+    // [핵심] 데이터 불러오기 (홈 피드 & 내 블로그 분리)
     async function loadPosts() {
-        const list = document.getElementById('post-list');
-        list.innerHTML = "<p style='text-align:center; color:#999; padding:20px;'>불러오는 중...</p>";
+        const homeList = document.getElementById('post-list');
+        const myList = document.getElementById('my-post-list');
+        const user = auth.currentUser;
+        
+        homeList.innerHTML = "<p style='text-align:center; color:#999; padding:20px;'>불러오는 중...</p>";
+        myList.innerHTML = "<p style='text-align:center; color:#999; padding:20px;'>불러오는 중...</p>";
+        
         try {
             const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
             const snap = await getDocs(q);
-            list.innerHTML = "";
+            
+            homeList.innerHTML = "";
+            myList.innerHTML = "";
+            let myPostCount = 0;
+
             snap.forEach(doc => {
                 const d = doc.data();
-                list.innerHTML += `
+                const cardHTML = `
                     <div class="post-card">
                         <p class="post-text">${d.text}</p>
                         <div class="post-info">
@@ -175,19 +186,32 @@
                             <span>${d.time || ''}</span>
                         </div>
                     </div>`;
+                
+                // 1. 홈 피드에는 모든 글 추가
+                homeList.innerHTML += cardHTML;
+
+                // 2. 내 블로그에는 내 고유 ID(uid)와 일치하는 글만 추가
+                if (user && d.uid === user.uid) {
+                    myList.innerHTML += cardHTML;
+                    myPostCount++;
+                }
             });
-        } catch(e) { list.innerHTML = "<p style='text-align:center;'>데이터를 가져올 수 없습니다.</p>"; }
+
+            if (myPostCount === 0) {
+                myList.innerHTML = "<p style='text-align:center; color:#ccc; padding:30px 0;'>아직 작성한 문장이 없습니다.</p>";
+            }
+        } catch(e) { 
+            homeList.innerHTML = "<p style='text-align:center;'>데이터를 가져올 수 없습니다.</p>"; 
+        }
     }
 
-    // [검색 로직]
     document.getElementById('btn-search').onclick = () => {
         const val = document.getElementById('search-input').value.toLowerCase();
-        document.querySelectorAll('.post-card').forEach(card => {
+        document.querySelectorAll('#post-list .post-card').forEach(card => {
             card.style.display = card.innerText.toLowerCase().includes(val) ? 'block' : 'none';
         });
     };
 
-    // [인증 상태 감지]
     onAuthStateChanged(auth, (user) => {
         const authUI = document.getElementById('auth-container');
         const appUI = document.getElementById('app-container');
