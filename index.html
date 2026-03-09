@@ -3,126 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shortlog</title>
+    <title>Shortlog - 문장별 독서 커뮤니티</title>
     <style>
-        /* 기본 레이아웃 */
-        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Pretendard', sans-serif; background: #f8f9fa; }
-        #auth-container, #app-container, #join-container { height: 100%; width: 100%; display: none; }
+        :root {
+            --primary: #00c73c;
+            --bg: #f8f9fa;
+            --text: #2c3e50;
+        }
+
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Pretendard', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
         
-        /* 로그인 & 온보딩 */
-        #auth-container, #join-container { flex-direction: column; justify-content: center; align-items: center; background: white; position: fixed; top: 0; left: 0; z-index: 9999; padding: 20px; box-sizing: border-box; }
-        .login-logo { font-size: 3rem; font-weight: bold; color: #00c73c; margin-bottom: 10px; }
-        .btn-google { background: #4285F4; color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(66,133,244,0.3); }
+        /* 화면 전환 엔진 */
+        .screen { display: none; height: 100%; width: 100%; position: absolute; flex-direction: column; background: var(--bg); }
+        .screen.active { display: flex; z-index: 10; }
+        .scroll-area { flex: 1; overflow-y: auto; padding-bottom: 80px; }
 
-        /* 화면 공통 */
-        .page { display: none; height: 100%; width: 100%; overflow-y: auto; padding-bottom: 100px; box-sizing: border-box; background: #f8f9fa; }
-        .page.active { display: block; }
-        header { background: white; padding: 15px 20px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
-        header h1 { margin: 0; font-size: 1.2rem; color: #00c73c; }
+        /* 공통 헤더 */
+        header { padding: 15px 20px; background: white; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        header h1 { margin: 0; font-size: 1.2rem; color: var(--primary); font-weight: 800; }
 
-        /* [핵심] 홈 화면 글 목록 (운수 좋은 날 스타일) */
-        .post-card { background: white; padding: 20px; border-radius: 12px; margin: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; border-left: 4px solid transparent; transition: 0.2s; }
-        .post-card:hover { border-left: 4px solid #00c73c; }
-        .post-title { font-size: 1.2rem; font-weight: bold; margin: 0 0 5px 0; color: #222; }
-        .post-author { font-size: 0.9rem; color: #666; margin-bottom: 10px; }
-        .post-preview { font-size: 0.95rem; color: #888; line-height: 1.5; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        /* 목록 카드 (메인) */
+        .post-card { background: white; margin: 15px; padding: 20px; border-radius: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; }
+        .post-card:active { transform: scale(0.98); }
+        .post-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 5px; color: #333; }
+        .post-author { font-size: 0.9rem; color: #95a5a6; margin-bottom: 10px; }
+        .post-preview { font-size: 0.95rem; color: #666; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-        /* [핵심] 상세 페이지 (문장별 읽기) */
-        .detail-header-info { padding: 30px 20px; background: white; text-align: center; border-bottom: 1px solid #eee; }
-        .detail-title { font-size: 1.8rem; font-weight: bold; margin: 0 0 10px 0; color: #111; }
-        .detail-author { font-size: 1rem; color: #555; }
+        /* 문장 시스템 (상세화면) */
+        .sentence { position: relative; cursor: pointer; border-radius: 4px; padding: 2px 0; transition: 0.2s; line-height: 2.2; font-size: 1.1rem; }
+        .sentence:hover { background-color: #e3f2fd; }
+        .sentence.active { background-color: #fff9db; box-shadow: 0 0 0 2px #fff9db; font-weight: 500; }
         
-        .sentence { padding: 15px 20px; border-bottom: 1px dashed #f1f1f1; font-size: 1.1rem; line-height: 1.8; cursor: pointer; transition: background 0.2s; color: #333; }
-        .sentence:hover { background: #fcfcfc; }
-        .sentence.selected { background: #e8f9ed; border-left: 5px solid #00c73c; font-weight: 500; }
-        
-        .comment-box { background: white; padding: 20px; border-top: 1px solid #eee; margin-top: 20px; }
-        .comment-item { padding: 10px 0; border-bottom: 1px solid #f9f9f9; font-size: 0.95rem; line-height: 1.4; }
+        .comment-count {
+            display: inline-flex; align-items: center; justify-content: center;
+            background-color: #ff4d4d; color: white; font-size: 10px; font-weight: bold;
+            min-width: 16px; height: 16px; border-radius: 10px; padding: 0 4px;
+            margin-left: 2px; vertical-align: middle; border: 1px solid white;
+        }
 
-        /* 공통 UI & 모달 */
-        .input-main { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; font-family: 'Pretendard', sans-serif; }
-        .btn-send { background: #00c73c; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .btn-send:disabled { background: #ccc; }
+        /* 댓글 팝업 UI */
+        #comment-popup {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 60vh;
+            background: white; box-shadow: 0 -5px 25px rgba(0,0,0,0.15);
+            border-radius: 20px 20px 0 0; z-index: 1000;
+            transform: translateY(100%); transition: 0.3s ease-out;
+            display: flex; flex-direction: column;
+        }
+        #comment-popup.show { transform: translateY(0); }
+        #popup-header { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        #comment-list { flex: 1; overflow-y: auto; padding: 20px; background: #f8f9fa; }
+        .comment-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 
-        .fab { position: fixed; bottom: 30px; right: 20px; background: #00c73c; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2rem; box-shadow: 0 4px 15px rgba(0,199,60,0.4); border: none; cursor: pointer; z-index: 900; }
-        
-        #write-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; justify-content: center; align-items: center; }
-        .modal-content { background: white; width: 90%; max-width: 500px; padding: 25px; border-radius: 15px; }
+        /* 글쓰기 모달 & 버튼 */
+        .fab { position: fixed; bottom: 30px; right: 20px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; border: none; box-shadow: 0 4px 15px rgba(0,199,60,0.3); z-index: 100; cursor: pointer; }
+        #modal-write { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 90%; max-width: 500px; padding: 25px; border-radius: 20px; }
+        .input-main { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; }
+        .btn-submit { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+
+        #overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); display: none; z-index: 999; }
+        #overlay.show { display: block; }
     </style>
 </head>
 <body>
 
-    <div id="auth-container" style="display: flex;">
-        <div class="login-logo">Shortlog</div>
-        <p style="color: #666; margin-bottom: 40px;">문장으로 나누는 우리들의 문학</p>
-        <button id="btn-login" class="btn-google">구글로 시작하기</button>
+    <div id="overlay"></div>
+
+    <div id="scr-main" class="screen active">
+        <header><h1>Shortlog</h1></header>
+        <div id="post-feed" class="scroll-area"></div>
+        <button class="fab" id="btn-open-write">＋</button>
     </div>
 
-    <div id="join-container">
-        <h2 style="color:#00c73c">환영합니다!</h2>
-        <p style="color:#666; margin-bottom:30px;">사용하실 아이디와 닉네임을 정해주세요.</p>
-        <input id="join-id" class="input-main" placeholder="고유 아이디 (영문/숫자)">
-        <input id="join-nick" class="input-main" placeholder="닉네임">
-        <button id="btn-join-submit" class="btn-send" style="width:100%; padding:15px; border-radius:30px;">시작하기</button>
+    <div id="scr-detail" class="screen">
+        <header>
+            <button onclick="goHome()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">←</button>
+            <h1 id="det-header-title" style="font-size:1rem; color:#333;">기록 읽기</h1>
+            <div style="width:24px;"></div>
+        </header>
+        <div class="scroll-area" style="padding: 20px;">
+            <h1 id="det-title" style="text-align: center; margin-bottom: 5px;"></h1>
+            <p id="det-author" style="text-align: center; color: #7f8c8d; margin-bottom: 40px;"></p>
+            <div id="det-content" style="line-height: 2.2;"></div>
+        </div>
     </div>
 
-    <div id="app-container">
-        
-        <div id="page-home" class="page active">
-            <header>
-                <h1>Shortlog 서재</h1>
-                <button id="btn-logout" style="background:none; border:none; color:#999; cursor:pointer;">로그아웃</button>
-            </header>
-            <div id="post-list"></div>
+    <div id="comment-popup">
+        <div id="popup-header">
+            <span id="selected-preview" style="font-size:0.9rem; color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80%;"></span>
+            <button onclick="closePopup()" style="background:none; border:none; font-size:1.5rem; color:#ccc;">&times;</button>
         </div>
-
-        <div id="page-detail" class="page">
-            <header>
-                <button onclick="goHome()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">←</button>
-                <h1 style="font-size:1rem; color:#333;">작품 읽기</h1>
-                <div style="width:24px;"></div>
-            </header>
-            <div id="detail-content">
-                <div class="detail-header-info">
-                    <h2 id="det-title" class="detail-title">제목</h2>
-                    <p id="det-author" class="detail-author">작가 이름</p>
-                </div>
-                <div id="det-sentences"></div>
-                
-                <div class="comment-box">
-                    <p id="comment-label" style="font-size:0.85rem; color:#00c73c; font-weight:bold; margin-top:0;">작품 전체에 감상 남기기</p>
-                    <div style="display:flex; gap:8px;">
-                        <input id="comment-input" class="input-main" placeholder="감상을 입력하세요..." style="margin:0;">
-                        <button id="btn-comment-submit" class="btn-send">등록</button>
-                    </div>
-                    <div id="comment-list" style="margin-top:20px;"></div>
-                </div>
-            </div>
+        <div id="comment-list"></div>
+        <div style="padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px;">
+            <input id="cmt-nick" class="input-main" style="width: 80px; margin:0;" value="익명">
+            <input id="cmt-input" class="input-main" style="flex:1; margin:0;" placeholder="생각을 남겨주세요.">
+            <button id="btn-cmt-submit" class="btn-submit">등록</button>
         </div>
+    </div>
 
-        <button class="fab" id="btn-open-write">✏️</button>
-
-        <div id="write-modal">
-            <div class="modal-content">
-                <h3 style="margin:0 0 20px 0; font-size:1.4rem;">새 작품 등록</h3>
-                <input id="write-title" class="input-main" placeholder="작품 제목 (예: 운수 좋은 날)">
-                <input id="write-author" class="input-main" placeholder="작가 이름 (예: 현진건)">
-                <textarea id="write-body" class="input-main" style="height:200px; resize:none;" placeholder="본문을 입력하세요.&#13;&#10;(엔터를 치면 문장이 분리되어 감상을 남길 수 있습니다.)"></textarea>
-                
-                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
-                    <button id="btn-close-write" class="btn-send" style="background:#f1f1f1; color:#666;">취소</button>
-                    <button id="btn-submit-write" class="btn-send">서재에 올리기</button>
-                </div>
+    <div id="modal-write">
+        <div class="modal-content">
+            <h3 style="margin-top:0;">새 글 올리기</h3>
+            <input id="write-title" class="input-main" placeholder="제목">
+            <input id="write-author" class="input-main" placeholder="작가/작성자">
+            <textarea id="write-body" class="input-main" style="height:200px; resize:none;" placeholder="본문을 입력하세요. (엔터로 문장이 구분됩니다)"></textarea>
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button onclick="closeWrite()" style="border:none; background:#eee; padding:10px 20px; border-radius:10px;">취se</button>
+                <button id="btn-post-submit" class="btn-submit">등록하기</button>
             </div>
         </div>
     </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, orderBy, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // 기존 설정 그대로 재활용
+    // [Shortlog 파이어베이스 설정 재활용]
     const firebaseConfig = {
         apiKey: "AIzaSyCyCdlkXcLMvGO3NVg5QPQsPMPrd_JyaUY",
         authDomain: "shortlog-0.firebaseapp.com",
@@ -133,195 +129,163 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
 
-    let myInfo = null;
-    let currentDetailId = null;
-    let selectedIdx = -1;
+    let activePostId = null;
+    let activeSentenceIdx = null;
+    let allComments = [];
 
-    // 화면 전환 함수
-    window.changePage = (pageId) => {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(pageId).classList.add('active');
-        // 홈 화면일 때만 글쓰기 버튼 보이기
-        document.getElementById('btn-open-write').style.display = (pageId === 'page-home') ? 'flex' : 'none';
-    };
-    window.goHome = () => changePage('page-home');
+    // 화면 전환
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+    window.goHome = () => { showScreen('scr-main'); closePopup(); };
 
-    // 1. 인증 로직
-    onAuthStateChanged(auth, async (user) => {
-        const authUI = document.getElementById('auth-container');
-        const joinUI = document.getElementById('join-container');
-        const appUI = document.getElementById('app-container');
-
-        if (user) {
-            authUI.style.display = 'none';
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists()) {
-                myInfo = userDoc.data();
-                joinUI.style.display = 'none';
-                appUI.style.display = 'block';
-                changePage('page-home');
-                loadFeed();
-            } else {
-                joinUI.style.display = 'flex';
-                appUI.style.display = 'none';
-            }
-        } else {
-            authUI.style.display = 'flex';
-            joinUI.style.display = 'none';
-            appUI.style.display = 'none';
-        }
-    });
-
-    document.getElementById('btn-login').onclick = () => signInWithPopup(auth, provider);
-    document.getElementById('btn-logout').onclick = () => signOut(auth);
-
-    // 2. 고유 아이디 가입
-    document.getElementById('btn-join-submit').onclick = async () => {
-        const cid = document.getElementById('join-id').value.trim();
-        const nick = document.getElementById('join-nick').value.trim();
-        if(!cid || !nick) return alert("아이디와 닉네임을 입력해주세요.");
-
-        const q = query(collection(db, "users"), where("customId", "==", cid));
-        const snap = await getDocs(q);
-        if(!snap.empty) return alert("이미 사용 중인 아이디입니다.");
-
-        const userData = { uid: auth.currentUser.uid, customId: cid, nickname: nick };
-        await setDoc(doc(db, "users", auth.currentUser.uid), userData);
-        myInfo = userData;
-        document.getElementById('join-container').style.display = 'none';
-        document.getElementById('app-container').style.display = 'block';
-        changePage('page-home');
-        loadFeed();
-    };
-
-    // 3. 새 글(작품) 등록 모달 제어
-    const modal = document.getElementById('write-modal');
-    document.getElementById('btn-open-write').onclick = () => {
-        modal.style.display = 'flex';
-        // 기본적으로 로그인한 유저의 닉네임을 작가로 자동 채워줌 (변경 가능)
-        if(myInfo) document.getElementById('write-author').value = myInfo.nickname;
-    };
-    document.getElementById('btn-close-write').onclick = () => modal.style.display = 'none';
-
-    document.getElementById('btn-submit-write').onclick = async () => {
-        const title = document.getElementById('write-title').value.trim();
-        const author = document.getElementById('write-author').value.trim();
-        const body = document.getElementById('write-body').value.trim();
-        
-        if(!title || !author || !body) return alert("제목, 작가, 본문을 모두 채워주세요.");
-
-        const btn = document.getElementById('btn-submit-write');
-        btn.disabled = true;
-
-        try {
-            await addDoc(collection(db, "posts"), {
-                title: title, 
-                authorName: author, // 유저가 직접 입력한 작가명
-                content: body, 
-                uploaderUid: myInfo.uid, 
-                uploaderNick: myInfo.nickname,
-                timestamp: serverTimestamp()
-            });
-            modal.style.display = 'none';
-            document.getElementById('write-title').value = "";
-            document.getElementById('write-body').value = "";
-            loadFeed();
-        } catch (e) { alert("저장 실패"); }
-        btn.disabled = false;
-    };
-
-    // 4. 메인 화면 글 목록 불러오기
-    async function loadFeed() {
-        const list = document.getElementById('post-list');
-        list.innerHTML = "";
-
-        const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
-        const snap = await getDocs(q);
-
-        snap.forEach(docSnap => {
-            const d = docSnap.data();
-            const firstLine = d.content.split('\n')[0]; // 첫 줄만 미리보기로 사용
-            
+    // 글 목록 불러오기 (실시간)
+    onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snap) => {
+        const feed = document.getElementById('post-feed');
+        feed.innerHTML = "";
+        snap.forEach(doc => {
+            const d = doc.data();
             const card = document.createElement('div');
             card.className = 'post-card';
-            card.onclick = () => openDetail(docSnap.id, d);
+            card.onclick = () => openDetail(doc.id, d);
             card.innerHTML = `
                 <div class="post-title">${d.title}</div>
-                <div class="post-author">${d.authorName || d.uploaderNick}</div>
-                <div class="post-preview">${firstLine}</div>
+                <div class="post-author">${d.author}</div>
+                <div class="post-preview">${d.content.substring(0, 100)}...</div>
             `;
-            list.appendChild(card);
+            feed.appendChild(card);
+        });
+    });
+
+    // 상세 보기 (문장 분리 로직 적용)
+    window.openDetail = (id, data) => {
+        activePostId = id;
+        document.getElementById('det-title').innerText = data.title;
+        document.getElementById('det-author').innerText = data.author;
+        
+        const contentBox = document.getElementById('det-content');
+        contentBox.innerHTML = "";
+        
+        const lines = data.content.split('\n');
+        let sCount = 0;
+        lines.forEach(line => {
+            if(!line.trim()) return;
+            const p = document.createElement('p');
+            // 문장 단위 분리 (정규식)
+            const sentences = line.match(/[^.!?]+[.!?]?[”"]?|.+$/g);
+            sentences?.forEach(s => {
+                const idx = sCount++;
+                const span = document.createElement('span');
+                span.className = 'sentence';
+                span.dataset.idx = idx;
+                span.textContent = s;
+                span.onclick = () => openComments(idx, s);
+                p.appendChild(span);
+            });
+            contentBox.appendChild(p);
+        });
+        showScreen('scr-detail');
+        listenComments(); // 해당 글의 댓글 실시간 감시 시작
+    };
+
+    // 댓글 시스템
+    function openComments(idx, text) {
+        activeSentenceIdx = idx;
+        document.getElementById('selected-preview').innerText = text;
+        document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
+        document.querySelector(`.sentence[data-idx="${idx}"]`).classList.add('active');
+        renderComments();
+        document.getElementById('comment-popup').classList.add('show');
+        document.getElementById('overlay').classList.add('show');
+    }
+
+    window.closePopup = () => {
+        document.getElementById('comment-popup').classList.remove('show');
+        document.getElementById('overlay').classList.remove('show');
+    };
+
+    function listenComments() {
+        onSnapshot(query(collection(db, "comments"), orderBy("timestamp", "asc")), (snap) => {
+            allComments = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            updateBadges();
+            if(document.getElementById('comment-popup').classList.contains('show')) renderComments();
         });
     }
 
-    // 5. 작품 상세 읽기 (문장별 분리)
-    window.openDetail = (id, data) => {
-        currentDetailId = id;
-        selectedIdx = -1;
-        
-        document.getElementById('det-title').innerText = data.title;
-        document.getElementById('det-author').innerText = data.authorName || data.uploaderNick;
-        
-        const sentBox = document.getElementById('det-sentences');
-        sentBox.innerHTML = "";
-        
-        // 엔터를 기준으로 문장을 나누어 배열로 만듦
-        const lines = data.content.split('\n').filter(l => l.trim() !== "");
-        lines.forEach((line, idx) => {
-            const div = document.createElement('div');
-            div.className = 'sentence';
-            div.innerText = line;
-            div.onclick = () => {
-                document.querySelectorAll('.sentence').forEach(s => s.classList.remove('selected'));
-                div.classList.add('selected');
-                selectedIdx = idx;
-                document.getElementById('comment-label').innerText = `[${idx+1}번째 문장]에 감상 남기기`;
-                loadComments();
-            };
-            sentBox.appendChild(div);
-        });
-        
-        document.getElementById('comment-label').innerText = "작품 전체에 감상 남기기";
-        loadComments();
-        changePage('page-detail');
-    };
-
-    // 6. 댓글(감상) 등록 및 불러오기
-    document.getElementById('btn-comment-submit').onclick = async () => {
-        const inp = document.getElementById('comment-input');
-        if(!inp.value.trim()) return;
-        
-        await addDoc(collection(db, "comments"), {
-            postId: currentDetailId, 
-            sentenceIdx: selectedIdx, 
-            text: inp.value,
-            authorNick: myInfo.nickname, 
-            timestamp: serverTimestamp()
-        });
-        inp.value = "";
-        loadComments();
-    };
-
-    async function loadComments() {
+    function renderComments() {
         const list = document.getElementById('comment-list');
         list.innerHTML = "";
-        
-        const q = query(collection(db, "comments"), 
-            where("postId", "==", currentDetailId), 
-            where("sentenceIdx", "==", selectedIdx), 
-            orderBy("timestamp", "asc")
-        );
-        const snap = await getDocs(q);
-        
-        snap.forEach(d => {
-            const c = d.data();
-            list.innerHTML += `<div class="comment-item"><b>${c.authorNick}</b> : ${c.text}</div>`;
+        const filtered = allComments.filter(c => c.postId === activePostId && c.sentenceIdx === activeSentenceIdx);
+        if(filtered.length === 0) {
+            list.innerHTML = "<p style='text-align:center; color:#ccc; margin-top:50px;'>첫 감상을 남겨보세요.</p>";
+        } else {
+            filtered.forEach(c => {
+                list.innerHTML += `
+                    <div class="comment-card">
+                        <div style="font-weight:bold; font-size:0.8rem; margin-bottom:5px;">${c.nickname}</div>
+                        <div style="font-size:0.95rem;">${c.text}</div>
+                    </div>`;
+            });
+        }
+        list.scrollTop = list.scrollHeight;
+    }
+
+    function updateBadges() {
+        document.querySelectorAll('.sentence').forEach(span => {
+            const idx = parseInt(span.dataset.idx);
+            const count = allComments.filter(c => c.postId === activePostId && c.sentenceIdx === idx).length;
+            let badge = span.querySelector('.comment-count');
+            if(count > 0) {
+                if(!badge) { badge = document.createElement('span'); badge.className = 'comment-count'; span.appendChild(badge); }
+                badge.textContent = count;
+            } else if(badge) badge.remove();
         });
     }
+
+    document.getElementById('btn-cmt-submit').onclick = async () => {
+        const text = document.getElementById('cmt-input').value.trim();
+        const nick = document.getElementById('cmt-nick').value.trim();
+        if(!text) return;
+        await addDoc(collection(db, "comments"), {
+            postId: activePostId,
+            sentenceIdx: activeSentenceIdx,
+            nickname: nick,
+            text: text,
+            timestamp: serverTimestamp()
+        });
+        document.getElementById('cmt-input').value = "";
+    };
+
+    // 글쓰기 기능
+    const writeModal = document.getElementById('modal-write');
+    document.getElementById('btn-open-write').onclick = () => writeModal.style.display = 'flex';
+    window.closeWrite = () => writeModal.style.display = 'none';
+
+    document.getElementById('btn-post-submit').onclick = async () => {
+        const title = document.getElementById('write-title').value.trim();
+        const author = document.getElementById('write-author').value.trim();
+        const content = document.getElementById('write-body').value.trim();
+        if(!title || !author || !content) return alert("모든 항목을 채워주세요.");
+
+        const btn = document.getElementById('btn-post-submit');
+        btn.disabled = true;
+
+        await addDoc(collection(db, "posts"), {
+            title, author, content,
+            timestamp: serverTimestamp()
+        });
+
+        btn.disabled = false;
+        closeWrite();
+        document.getElementById('write-title').value = "";
+        document.getElementById('write-author').value = "";
+        document.getElementById('write-body').value = "";
+    };
+
+    document.getElementById('overlay').onclick = closePopup;
 </script>
 </body>
 </html>
