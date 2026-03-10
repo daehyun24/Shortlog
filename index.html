@@ -17,45 +17,45 @@
         .screen.active { display: flex; z-index: 10; }
         .scroll-area { flex: 1; overflow-y: auto; padding-bottom: 80px; scroll-behavior: smooth; }
 
-        /* 헤더 공통 */
         header { padding: 15px 20px; background: white; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         header h1 { margin: 0; font-size: 1.2rem; color: var(--primary); font-weight: 800; }
 
-        /* [추가] 집중 모드 버튼 */
         .btn-focus { background: #f1f1f1; border: none; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; color: #666; font-weight: bold; transition: 0.2s; }
         .btn-focus.on { background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(0,199,60,0.3); }
 
-        /* 집중 모드 활성화 시 상태 */
         .focus-on .comment-count { display: none !important; }
-        .focus-on .sentence { cursor: text !important; }
-        .focus-on .sentence:hover { background-color: transparent !important; }
 
-        /* 메인 피드 카드 */
         .post-card { background: white; margin: 15px; padding: 20px; border-radius: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; }
         .post-card:active { transform: scale(0.98); }
         .post-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 5px; color: #333; }
         .post-author { font-size: 0.9rem; color: #95a5a6; margin-bottom: 10px; }
         .post-preview { font-size: 0.95rem; color: #666; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-        /* 문장 및 배지 시스템 */
-        .sentence { position: relative; cursor: pointer; border-radius: 4px; padding: 2px 0; transition: 0.2s; line-height: 2.2; font-size: 1.1rem; }
+        /* [수정] 강조표시 디자인 롤백: width 100% 제거 및 inline 성격 유지 */
+        .sentence { 
+            position: relative; 
+            cursor: pointer; 
+            border-radius: 4px; 
+            padding: 2px 4px; /* 좌우 여백 살짝 추가 */
+            transition: 0.2s; 
+            line-height: 2.2; 
+            font-size: 1.1rem; 
+            display: inline; /* 글자 크기만큼만 잡히도록 설정 */
+        }
         .sentence:hover { background-color: #e3f2fd; }
         .sentence.active { background-color: #fff9db; box-shadow: 0 0 0 2px #fff9db; font-weight: 500; }
         
-        .comment-count { display: inline-flex; align-items: center; justify-content: center; background-color: #ff4d4d; color: white; font-size: 10px; font-weight: bold; min-width: 16px; height: 16px; border-radius: 10px; padding: 0 4px; margin-left: 2px; vertical-align: middle; border: 1px solid white; }
+        .comment-count { display: inline-flex; align-items: center; justify-content: center; background-color: #ff4d4d; color: white; font-size: 10px; font-weight: bold; min-width: 16px; height: 16px; border-radius: 10px; padding: 0 4px; margin-left: 6px; vertical-align: middle; border: 1px solid white; }
 
-        /* [추가] 본문 속 책갈피 아이콘 */
-        .bookmark-mark { display: inline-flex; align-items: center; justify-content: center; margin-left: 4px; color: #f1c40f; vertical-align: middle; }
+        .bookmark-mark { display: inline-flex; align-items: center; justify-content: center; margin-left: 6px; color: #f1c40f; vertical-align: middle; }
         .bookmark-mark svg { width: 18px; height: 18px; fill: currentColor; }
 
-        /* 댓글 팝업 */
         #comment-popup { position: fixed; bottom: 0; left: 0; width: 100%; height: 60vh; background: white; box-shadow: 0 -5px 25px rgba(0,0,0,0.15); border-radius: 20px 20px 0 0; z-index: 1000; transform: translateY(100%); transition: 0.3s ease-out; display: flex; flex-direction: column; }
         #comment-popup.show { transform: translateY(0); }
         
         #popup-header { padding: 15px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
         #selected-preview { flex: 1; font-size: 0.9rem; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
         
-        /* [추가] 팝업 내 책갈피 토글 버튼 */
         .btn-bookmark { background: none; border: none; padding: 0; cursor: pointer; color: #ccc; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .btn-bookmark svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .btn-bookmark.active { color: #f1c40f; }
@@ -64,7 +64,6 @@
         #comment-list { flex: 1; overflow-y: auto; padding: 20px; background: #f8f9fa; }
         .comment-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 
-        /* 입력 폼 및 모달 */
         .fab { position: fixed; bottom: 30px; right: 20px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; border: none; box-shadow: 0 4px 15px rgba(0,199,60,0.3); z-index: 100; cursor: pointer; }
         #modal-write { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; justify-content: center; align-items: center; }
         .modal-content { background: white; width: 90%; max-width: 500px; padding: 25px; border-radius: 20px; }
@@ -92,7 +91,7 @@
         <header>
             <button onclick="goHome()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; margin-right: 15px;">←</button>
             <h1 id="det-header-title" style="font-size:1rem; color:#333; flex: 1;">기록 읽기</h1>
-            <button id="btn-focus" class="btn-focus" onclick="toggleFocusMode()">집중 끔</button>
+            <button id="btn-focus" class="btn-focus" onclick="toggleFocusMode()">댓글 켬</button>
         </header>
         <div class="scroll-area" id="detail-scroll-area" style="padding: 20px;">
             <h1 id="det-title" style="text-align: center; margin-bottom: 5px;"></h1>
@@ -103,7 +102,7 @@
 
     <div id="comment-popup">
         <div id="popup-header">
-            <button id="btn-bookmark" class="btn-bookmark" onclick="toggleBookmark()">
+            <button id="btn-bookmark" class="btn-bookmark" onclick="toggleBookmarkBtn()">
                 <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
             </button>
             <span id="selected-preview"></span>
@@ -150,18 +149,15 @@
     let activeSentenceIdx = null;
     let allComments = [];
     
-    // [추가] 집중 모드 및 책갈피 데이터 관리
     let isFocusMode = false;
     let bookmarks = JSON.parse(localStorage.getItem('shortlog_bookmarks')) || {};
 
-    // 화면 전환
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
     window.goHome = () => { showScreen('scr-main'); closePopup(); };
 
-    // 메인 글 목록 로드
     onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snap) => {
         const feed = document.getElementById('post-feed');
         feed.innerHTML = "";
@@ -179,7 +175,6 @@
         });
     });
 
-    // 상세 보기 (문장 세팅)
     window.openDetail = (id, data) => {
         activePostId = id;
         document.getElementById('det-title').innerText = data.title;
@@ -190,31 +185,44 @@
         
         const lines = data.content.split('\n');
         let sCount = 0;
+        
         lines.forEach(line => {
-            if(!line.trim()) return;
+            if(!line.trim()) {
+                contentBox.appendChild(document.createElement('br'));
+                return;
+            }
             const p = document.createElement('p');
-            const sentences = line.match(/[^.!?]+[.!?]?[”"]?|.+$/g);
-            sentences?.forEach(s => {
-                const idx = sCount++;
-                const span = document.createElement('span');
-                span.className = 'sentence';
-                span.dataset.idx = idx;
-                span.textContent = s;
-                // [수정] 집중 모드일 때는 클릭 무시
-                span.onclick = () => {
-                    if(isFocusMode) return;
-                    openComments(idx, s);
-                };
-                p.appendChild(span);
-            });
+            p.style.margin = "0 0 15px 0"; 
+            
+            const idx = sCount++;
+            const span = document.createElement('span');
+            span.className = 'sentence';
+            span.dataset.idx = idx;
+            span.textContent = line;
+            
+            span.onclick = (e) => {
+                e.stopPropagation(); 
+                if (isFocusMode) {
+                    if (span.classList.contains('active')) {
+                        activeSentenceIdx = idx;
+                        toggleBookmarkLogic();
+                    } else {
+                        document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
+                        span.classList.add('active');
+                    }
+                } else {
+                    openComments(idx, line);
+                }
+            };
+            
+            p.appendChild(span);
             contentBox.appendChild(p);
         });
 
-        renderBookmarkInText(); // 책갈피 아이콘 렌더링 추가
+        renderBookmarkInText(); 
         showScreen('scr-detail');
         listenComments(); 
 
-        // [추가] 책갈피 위치로 자동 스크롤
         setTimeout(() => {
             const savedIdx = bookmarks[activePostId];
             if(savedIdx !== undefined) {
@@ -222,15 +230,20 @@
                 if(targetSpan) {
                     targetSpan.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     targetSpan.style.backgroundColor = '#fff9db';
-                    setTimeout(() => targetSpan.style.backgroundColor = '', 1500); // 잠시 하이라이트 후 복구
+                    setTimeout(() => targetSpan.style.backgroundColor = '', 1500);
                 }
             } else {
-                document.getElementById('detail-scroll-area').scrollTop = 0; // 책갈피 없으면 맨 위로
+                document.getElementById('detail-scroll-area').scrollTop = 0;
             }
         }, 150);
     };
 
-    // [추가] 집중 모드 토글
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.sentence') && !e.target.closest('#comment-popup') && !e.target.closest('#btn-focus') && !e.target.closest('.fab') && !e.target.closest('.modal-content')) {
+            document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
+        }
+    });
+
     window.toggleFocusMode = () => {
         isFocusMode = !isFocusMode;
         const btn = document.getElementById('btn-focus');
@@ -238,26 +251,30 @@
         
         if (isFocusMode) {
             btn.classList.add('on');
-            btn.innerText = "집중 켬";
+            btn.innerText = "집중모드"; 
             content.classList.add('focus-on');
-            closePopup(); // 모드 켜지면 팝업 닫기
+            closePopup(); 
         } else {
             btn.classList.remove('on');
-            btn.innerText = "집중 끔";
+            btn.innerText = "댓글끄기"; 
             content.classList.remove('focus-on');
+            document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
         }
     };
 
-    // [추가] 책갈피 기능 로직 (토글 및 렌더링)
-    window.toggleBookmark = () => {
+    function toggleBookmarkLogic() {
         if(bookmarks[activePostId] === activeSentenceIdx) {
-            delete bookmarks[activePostId]; // 이미 설정된 곳이면 해제
+            delete bookmarks[activePostId];
         } else {
-            bookmarks[activePostId] = activeSentenceIdx; // 새로운 곳 설정 (자동 덮어쓰기)
+            bookmarks[activePostId] = activeSentenceIdx;
         }
         localStorage.setItem('shortlog_bookmarks', JSON.stringify(bookmarks));
         updateBookmarkBtnUI();
         renderBookmarkInText();
+    }
+
+    window.toggleBookmarkBtn = () => {
+        toggleBookmarkLogic();
     };
 
     function updateBookmarkBtnUI() {
@@ -269,7 +286,6 @@
         }
     }
 
-    // 본문에 책갈피 아이콘 배치 (배지 뒤에 오도록 처리)
     function renderBookmarkInText() {
         document.querySelectorAll('.bookmark-mark').forEach(el => el.remove());
         const savedIdx = bookmarks[activePostId];
@@ -279,21 +295,19 @@
             if(targetSpan) {
                 const mark = document.createElement('span');
                 mark.className = 'bookmark-mark';
-                // 색이 채워진 노란색 책갈피 SVG
                 mark.innerHTML = `<svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>`;
                 targetSpan.appendChild(mark); 
             }
         }
     }
 
-    // 댓글 시스템
     function openComments(idx, text) {
         activeSentenceIdx = idx;
         document.getElementById('selected-preview').innerText = text;
         document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
         document.querySelector(`.sentence[data-idx="${idx}"]`).classList.add('active');
         
-        updateBookmarkBtnUI(); // 열 때 버튼 색상 동기화
+        updateBookmarkBtnUI(); 
         renderComments();
         
         document.getElementById('comment-popup').classList.add('show');
@@ -303,6 +317,7 @@
     window.closePopup = () => {
         document.getElementById('comment-popup').classList.remove('show');
         document.getElementById('overlay').classList.remove('show');
+        document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
     };
 
     function listenComments() {
@@ -331,7 +346,6 @@
         list.scrollTop = list.scrollHeight;
     }
 
-    // [수정] 배지와 책갈피 순서 충돌 방지
     function updateBadges() {
         document.querySelectorAll('.sentence').forEach(span => {
             const idx = parseInt(span.dataset.idx);
@@ -342,7 +356,6 @@
                 if(!badge) {
                     badge = document.createElement('span');
                     badge.className = 'comment-count';
-                    // 책갈피가 존재하면 그 '앞'에 배지 삽입, 없으면 그냥 뒤에 추가
                     const mark = span.querySelector('.bookmark-mark');
                     if(mark) span.insertBefore(badge, mark);
                     else span.appendChild(badge);
@@ -366,7 +379,6 @@
         document.getElementById('cmt-input').value = "";
     };
 
-    // 글쓰기 기능
     const writeModal = document.getElementById('modal-write');
     document.getElementById('btn-open-write').onclick = () => writeModal.style.display = 'flex';
     window.closeWrite = () => writeModal.style.display = 'none';
