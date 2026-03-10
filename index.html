@@ -6,9 +6,10 @@
     <title>Shortlog - 문장별 독서 커뮤니티</title>
     <style>
         :root {
-            --primary: #00c73c;
+            --primary: #00c73c; /* 네이버 스타일 초록색 */
             --bg: #f8f9fa;
             --text: #2c3e50;
+            --gray-text: #8e8e93; /* 부드러운 회색 톤 */
         }
 
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Pretendard', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
@@ -17,11 +18,48 @@
         .screen.active { display: flex; z-index: 10; }
         .scroll-area { flex: 1; overflow-y: auto; padding-bottom: 80px; scroll-behavior: smooth; }
 
-        header { padding: 15px 20px; background: white; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        header h1 { margin: 0; font-size: 1.2rem; color: var(--primary); font-weight: 800; }
+        /* [수정] 헤더 두께 슬림화: padding을 15px -> 8px로 조정 */
+        header { 
+            padding: 8px 15px; 
+            background: white; 
+            border-bottom: 1px solid #eee; 
+            display: flex; 
+            justify-content: flex-start; 
+            align-items: center; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            min-height: 50px; /* 최소 높이 설정으로 안정감 유지 */
+        }
+        header h1 { margin: 0; font-size: 1.05rem; font-weight: 800; }
 
-        .btn-focus { background: #f1f1f1; border: none; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; color: #666; font-weight: bold; transition: 0.2s; }
-        .btn-focus.on { background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(0,199,60,0.3); }
+        .btn-back {
+            background: none; border: none; cursor: pointer; 
+            margin-right: 10px; color: var(--gray-text); 
+            display: flex; align-items: center; justify-content: center; padding: 0;
+            transition: 0.2s;
+        }
+        .btn-back svg { width: 22px; height: 22px; fill: currentColor; }
+
+        /* [수정] 버튼 스타일 반전: 기본이 초록색(댓글 켬), .off 클래스가 회색(댓글 끔) */
+        .btn-focus { 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            padding: 5px 12px; 
+            border-radius: 20px; 
+            font-size: 0.8rem; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: 0.2s; 
+            margin-left: auto;
+            box-shadow: 0 2px 6px rgba(0,199,60,0.2);
+        }
+        .btn-focus.off { 
+            background: #f1f1f1; 
+            color: #888; 
+            box-shadow: none; 
+        }
 
         .focus-on .comment-count { display: none !important; }
 
@@ -31,31 +69,21 @@
         .post-author { font-size: 0.9rem; color: #95a5a6; margin-bottom: 10px; }
         .post-preview { font-size: 0.95rem; color: #666; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-        /* [수정] 강조표시 디자인 롤백: width 100% 제거 및 inline 성격 유지 */
         .sentence { 
-            position: relative; 
-            cursor: pointer; 
-            border-radius: 4px; 
-            padding: 2px 4px; /* 좌우 여백 살짝 추가 */
-            transition: 0.2s; 
-            line-height: 2.2; 
-            font-size: 1.1rem; 
-            display: inline; /* 글자 크기만큼만 잡히도록 설정 */
+            position: relative; cursor: pointer; border-radius: 4px; padding: 2px 4px; 
+            transition: 0.2s; line-height: 2.2; font-size: 1.1rem; display: inline; 
         }
         .sentence:hover { background-color: #e3f2fd; }
         .sentence.active { background-color: #fff9db; box-shadow: 0 0 0 2px #fff9db; font-weight: 500; }
         
         .comment-count { display: inline-flex; align-items: center; justify-content: center; background-color: #ff4d4d; color: white; font-size: 10px; font-weight: bold; min-width: 16px; height: 16px; border-radius: 10px; padding: 0 4px; margin-left: 6px; vertical-align: middle; border: 1px solid white; }
-
         .bookmark-mark { display: inline-flex; align-items: center; justify-content: center; margin-left: 6px; color: #f1c40f; vertical-align: middle; }
         .bookmark-mark svg { width: 18px; height: 18px; fill: currentColor; }
 
         #comment-popup { position: fixed; bottom: 0; left: 0; width: 100%; height: 60vh; background: white; box-shadow: 0 -5px 25px rgba(0,0,0,0.15); border-radius: 20px 20px 0 0; z-index: 1000; transform: translateY(100%); transition: 0.3s ease-out; display: flex; flex-direction: column; }
         #comment-popup.show { transform: translateY(0); }
-        
         #popup-header { padding: 15px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
         #selected-preview { flex: 1; font-size: 0.9rem; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
-        
         .btn-bookmark { background: none; border: none; padding: 0; cursor: pointer; color: #ccc; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .btn-bookmark svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .btn-bookmark.active { color: #f1c40f; }
@@ -80,8 +108,7 @@
 
     <div id="scr-main" class="screen active">
         <header>
-            <h1>Shortlog</h1>
-            <div style="width: 24px;"></div>
+            <h1 style="color: var(--primary);">Shortlog</h1>
         </header>
         <div id="post-feed" class="scroll-area"></div>
         <button class="fab" id="btn-open-write">＋</button>
@@ -89,14 +116,16 @@
 
     <div id="scr-detail" class="screen">
         <header>
-            <button onclick="goHome()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; margin-right: 15px;">←</button>
-            <h1 id="det-header-title" style="font-size:1rem; color:#333; flex: 1;">기록 읽기</h1>
+            <button class="btn-back" onclick="goHome()">
+                <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+            <h1 id="det-header-title" style="color: var(--gray-text); font-weight: 600;">전체 글 보기</h1>
             <button id="btn-focus" class="btn-focus" onclick="toggleFocusMode()">댓글 켬</button>
         </header>
         <div class="scroll-area" id="detail-scroll-area" style="padding: 20px;">
             <h1 id="det-title" style="text-align: center; margin-bottom: 5px;"></h1>
             <p id="det-author" style="text-align: center; color: #7f8c8d; margin-bottom: 40px;"></p>
-            <div id="det-content" style="line-height: 2.2;"></div>
+            <div id="det-content"></div>
         </div>
     </div>
 
@@ -121,7 +150,7 @@
             <h3 style="margin-top:0;">새 글 올리기</h3>
             <input id="write-title" class="input-main" placeholder="제목">
             <input id="write-author" class="input-main" placeholder="작가/작성자">
-            <textarea id="write-body" class="input-main" style="height:200px; resize:none;" placeholder="본문을 입력하세요. (엔터로 문장이 구분됩니다)"></textarea>
+            <textarea id="write-body" class="input-main" style="height:200px; resize:none;" placeholder="본문을 입력하세요."></textarea>
             <div style="display:flex; justify-content:flex-end; gap:10px;">
                 <button onclick="closeWrite()" style="border:none; background:#eee; padding:10px 20px; border-radius:10px; cursor:pointer;">취소</button>
                 <button id="btn-post-submit" class="btn-submit">등록하기</button>
@@ -148,7 +177,6 @@
     let activePostId = null;
     let activeSentenceIdx = null;
     let allComments = [];
-    
     let isFocusMode = false;
     let bookmarks = JSON.parse(localStorage.getItem('shortlog_bookmarks')) || {};
 
@@ -166,11 +194,7 @@
             const card = document.createElement('div');
             card.className = 'post-card';
             card.onclick = () => openDetail(doc.id, d);
-            card.innerHTML = `
-                <div class="post-title">${d.title}</div>
-                <div class="post-author">${d.author}</div>
-                <div class="post-preview">${d.content.substring(0, 100)}...</div>
-            `;
+            card.innerHTML = `<div class="post-title">${d.title}</div><div class="post-author">${d.author}</div><div class="post-preview">${d.content.substring(0, 100)}...</div>`;
             feed.appendChild(card);
         });
     });
@@ -179,117 +203,87 @@
         activePostId = id;
         document.getElementById('det-title').innerText = data.title;
         document.getElementById('det-author').innerText = data.author;
-        
         const contentBox = document.getElementById('det-content');
         contentBox.innerHTML = "";
-        
         const lines = data.content.split('\n');
         let sCount = 0;
-        
         lines.forEach(line => {
-            if(!line.trim()) {
-                contentBox.appendChild(document.createElement('br'));
-                return;
-            }
+            if(!line.trim()) { contentBox.appendChild(document.createElement('br')); return; }
             const p = document.createElement('p');
             p.style.margin = "0 0 15px 0"; 
-            
             const idx = sCount++;
             const span = document.createElement('span');
             span.className = 'sentence';
             span.dataset.idx = idx;
             span.textContent = line;
-            
             span.onclick = (e) => {
                 e.stopPropagation(); 
                 if (isFocusMode) {
-                    if (span.classList.contains('active')) {
-                        activeSentenceIdx = idx;
-                        toggleBookmarkLogic();
-                    } else {
-                        document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
-                        span.classList.add('active');
-                    }
-                } else {
-                    openComments(idx, line);
-                }
+                    if (span.classList.contains('active')) { activeSentenceIdx = idx; toggleBookmarkLogic(); }
+                    else { document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active')); span.classList.add('active'); }
+                } else { openComments(idx, line); }
             };
-            
             p.appendChild(span);
             contentBox.appendChild(p);
         });
-
         renderBookmarkInText(); 
         showScreen('scr-detail');
         listenComments(); 
-
         setTimeout(() => {
             const savedIdx = bookmarks[activePostId];
             if(savedIdx !== undefined) {
                 const targetSpan = document.querySelector(`.sentence[data-idx="${savedIdx}"]`);
-                if(targetSpan) {
-                    targetSpan.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    targetSpan.style.backgroundColor = '#fff9db';
-                    setTimeout(() => targetSpan.style.backgroundColor = '', 1500);
-                }
-            } else {
-                document.getElementById('detail-scroll-area').scrollTop = 0;
-            }
+                if(targetSpan) targetSpan.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else { document.getElementById('detail-scroll-area').scrollTop = 0; }
         }, 150);
     };
 
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.sentence') && !e.target.closest('#comment-popup') && !e.target.closest('#btn-focus') && !e.target.closest('.fab') && !e.target.closest('.modal-content')) {
+        if (!e.target.closest('.sentence') && !e.target.closest('#comment-popup') && !e.target.closest('header') && !e.target.closest('.fab')) {
             document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
         }
     });
 
+    // [수정] 토글 로직 변경
     window.toggleFocusMode = () => {
         isFocusMode = !isFocusMode;
         const btn = document.getElementById('btn-focus');
         const content = document.getElementById('det-content');
         
         if (isFocusMode) {
-            btn.classList.add('on');
-            btn.innerText = "집중모드"; 
+            // 집중모드 ON (댓글 끔 상태)
+            btn.classList.add('off');
+            btn.innerText = "댓글 끔"; 
             content.classList.add('focus-on');
             closePopup(); 
         } else {
-            btn.classList.remove('on');
-            btn.innerText = "댓글끄기"; 
+            // 집중모드 OFF (댓글 켬 상태)
+            btn.classList.remove('off');
+            btn.innerText = "댓글 켬"; 
             content.classList.remove('focus-on');
             document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
         }
     };
 
     function toggleBookmarkLogic() {
-        if(bookmarks[activePostId] === activeSentenceIdx) {
-            delete bookmarks[activePostId];
-        } else {
-            bookmarks[activePostId] = activeSentenceIdx;
-        }
+        if(bookmarks[activePostId] === activeSentenceIdx) delete bookmarks[activePostId];
+        else bookmarks[activePostId] = activeSentenceIdx;
         localStorage.setItem('shortlog_bookmarks', JSON.stringify(bookmarks));
         updateBookmarkBtnUI();
         renderBookmarkInText();
     }
 
-    window.toggleBookmarkBtn = () => {
-        toggleBookmarkLogic();
-    };
+    window.toggleBookmarkBtn = () => toggleBookmarkLogic();
 
     function updateBookmarkBtnUI() {
         const btn = document.getElementById('btn-bookmark');
-        if(bookmarks[activePostId] === activeSentenceIdx) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
+        if(bookmarks[activePostId] === activeSentenceIdx) btn.classList.add('active');
+        else btn.classList.remove('active');
     }
 
     function renderBookmarkInText() {
         document.querySelectorAll('.bookmark-mark').forEach(el => el.remove());
         const savedIdx = bookmarks[activePostId];
-        
         if(savedIdx !== undefined && savedIdx !== null) {
             const targetSpan = document.querySelector(`.sentence[data-idx="${savedIdx}"]`);
             if(targetSpan) {
@@ -306,10 +300,8 @@
         document.getElementById('selected-preview').innerText = text;
         document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
         document.querySelector(`.sentence[data-idx="${idx}"]`).classList.add('active');
-        
         updateBookmarkBtnUI(); 
         renderComments();
-        
         document.getElementById('comment-popup').classList.add('show');
         document.getElementById('overlay').classList.add('show');
     }
@@ -332,17 +324,10 @@
         const list = document.getElementById('comment-list');
         list.innerHTML = "";
         const filtered = allComments.filter(c => c.postId === activePostId && c.sentenceIdx === activeSentenceIdx);
-        if(filtered.length === 0) {
-            list.innerHTML = "<p style='text-align:center; color:#ccc; margin-top:50px;'>첫 감상을 남겨보세요.</p>";
-        } else {
-            filtered.forEach(c => {
-                list.innerHTML += `
-                    <div class="comment-card">
-                        <div style="font-weight:bold; font-size:0.8rem; margin-bottom:5px;">${c.nickname}</div>
-                        <div style="font-size:0.95rem;">${c.text}</div>
-                    </div>`;
-            });
-        }
+        if(filtered.length === 0) list.innerHTML = "<p style='text-align:center; color:#ccc; margin-top:50px;'>첫 감상을 남겨보세요.</p>";
+        else filtered.forEach(c => {
+            list.innerHTML += `<div class="comment-card"><div style="font-weight:bold; font-size:0.8rem; margin-bottom:5px;">${c.nickname}</div><div style="font-size:0.95rem;">${c.text}</div></div>`;
+        });
         list.scrollTop = list.scrollHeight;
     }
 
@@ -351,14 +336,12 @@
             const idx = parseInt(span.dataset.idx);
             const count = allComments.filter(c => c.postId === activePostId && c.sentenceIdx === idx).length;
             let badge = span.querySelector('.comment-count');
-            
             if(count > 0) {
                 if(!badge) {
                     badge = document.createElement('span');
                     badge.className = 'comment-count';
                     const mark = span.querySelector('.bookmark-mark');
-                    if(mark) span.insertBefore(badge, mark);
-                    else span.appendChild(badge);
+                    if(mark) span.insertBefore(badge, mark); else span.appendChild(badge);
                 }
                 badge.textContent = count;
             } else if(badge) badge.remove();
@@ -369,13 +352,7 @@
         const text = document.getElementById('cmt-input').value.trim();
         const nick = document.getElementById('cmt-nick').value.trim();
         if(!text) return;
-        await addDoc(collection(db, "comments"), {
-            postId: activePostId,
-            sentenceIdx: activeSentenceIdx,
-            nickname: nick,
-            text: text,
-            timestamp: serverTimestamp()
-        });
+        await addDoc(collection(db, "comments"), { postId: activePostId, sentenceIdx: activeSentenceIdx, nickname: nick, text: text, timestamp: serverTimestamp() });
         document.getElementById('cmt-input').value = "";
     };
 
@@ -388,15 +365,9 @@
         const author = document.getElementById('write-author').value.trim();
         const content = document.getElementById('write-body').value.trim();
         if(!title || !author || !content) return alert("모든 항목을 채워주세요.");
-
         const btn = document.getElementById('btn-post-submit');
         btn.disabled = true;
-
-        await addDoc(collection(db, "posts"), {
-            title, author, content,
-            timestamp: serverTimestamp()
-        });
-
+        await addDoc(collection(db, "posts"), { title, author, content, timestamp: serverTimestamp() });
         btn.disabled = false;
         closeWrite();
         document.getElementById('write-title').value = "";
